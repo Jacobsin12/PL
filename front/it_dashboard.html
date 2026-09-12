@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <title>Service Desk - Tecnologías de la Información</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="css/style.css?v=70">
+    <link rel="stylesheet" href="css/rh_dashboard.css?v=200">
+    <link rel="stylesheet" href="css/it_dashboard.css?v=50">
+
+    <!-- Librerías Externas -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar IT -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <button id="btn-toggle-sidebar" class="btn-icon"
+                    style="background: none; border: none; color: var(--text-main); cursor: pointer;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h2>Service Desk</h2>
+            </div>
+            <nav class="nav-menu" style="flex: 1;">
+                <a href="#" class="nav-item active" data-target="view-dashboard">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-it-pendientes">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Altas Pendientes</span>
+                    <span class="badge badge-blue" id="badge-nav-pendientes" style="display: none;">0</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-it-completadas">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span>Altas Completadas</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-reports">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <span>Reportes</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-notificaciones">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span>Notificaciones</span>
+                    <span class="badge badge-red" id="badge-nav-notificaciones" style="display: none;">0</span>
+                </a>
+            </nav>
+            <div class="sidebar-bottom-controls">
+                <label id="theme-toggle-container">
+                    <svg id="theme-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <div class="switch" style="margin: 0; pointer-events: none;">
+                        <input type="checkbox" id="theme-switch">
+                        <span class="slider round"></span>
+                    </div>
+                </label>
+                <button id="btn-logout" class="btn-logout-neon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content IT -->
+        <main class="main-content">
+            <!-- 1. Dashboard View (Métricas & Gráficas) -->
+            <div id="view-dashboard" class="view-section active">
+                <header class="header">
+                    <div class="header-titles">
+                        <h1>Resumen de Ingresos IT</h1>
+                        <p>Monitoreo automático de alta de usuarios y credenciales</p>
+                    </div>
+                </header>
+
+                <div class="kpi-top-row">
+                    <div class="card kpi-card">
+                        <div class="kpi-icon blue-glow">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                                fill="none">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Procesados</span>
+                            <span id="kpi-total" class="kpi-value">0</span>
+                        </div>
+                    </div>
+
+                    <div class="card kpi-card">
+                        <div class="kpi-icon purple-glow">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2"
+                                fill="none">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Áreas / Compañías</span>
+                            <span id="kpi-companies" class="kpi-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <h3>Ingresos por Área / Compañía</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="areasChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card table-card full-width">
+                        <div class="table-header-flex" style="flex-wrap: wrap; gap: 1rem; align-items: center;">
+                            <h3 style="margin: 0;">Últimos Registros Procesados</h3>
+                            <div
+                                style="display: flex; gap: 0.5rem; flex-wrap: wrap; flex: 1; justify-content: flex-end; align-items: center;">
+                                <select id="main-period" class="mini-select">
+                                    <option value="all">Todas las Fechas</option>
+                                    <option value="last-upload">Última Carga</option>
+                                    <option value="weekly">7 Días</option>
+                                    <option value="monthly">30 Días</option>
+                                </select>
+                                <select id="main-area" class="mini-select area-select">
+                                    <option value="all">Todas las Áreas</option>
+                                </select>
+                                <select id="main-planta" class="mini-select planta-select">
+                                    <option value="all">Todas las Plantas</option>
+                                </select>
+                                <div class="search-box" style="margin-left: 0.5rem;">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor"
+                                        stroke-width="2" fill="none">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                    <input type="text" id="search-input" placeholder="Buscar MUG o Nombre...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="recent-table">
+                                <thead>
+                                    <tr>
+                                        <th>MUG</th>
+                                        <th>Nombre</th>
+                                        <th>Puesto</th>
+                                        <th>Área</th>
+                                        <th>Planta</th>
+                                        <th>Fecha de Ingreso</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Altas Pendientes IT View -->
+            <div class="view-section" id="view-it-pendientes">
+                <header class="header">
+                    <div class="header-titles">
+                        <h1>Gestión de Altas IT (Pendientes)</h1>
+                        <p>Asignación de cuentas de correo y contraseñas por cargas</p>
+                    </div>
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2"
+                            fill="none">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="search-it-pendientes"
+                            placeholder="Buscar pendientes por MUG o Nombre...">
+                    </div>
+                </header>
+
+                <div id="it-cargas-view" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <!-- Llenado dinámicamente por cargas desde JS -->
+                </div>
+            </div>
+
+            <!-- 3. Altas Completadas IT View -->
+            <div class="view-section" id="view-it-completadas">
+                <header class="header">
+                    <div class="header-titles">
+                        <h1>Historial de Altas IT (Completadas)</h1>
+                        <p>Cargas procesadas y enviadas a Recursos Humanos</p>
+                    </div>
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2"
+                            fill="none">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="search-it-completadas" placeholder="Buscar en completadas...">
+                    </div>
+                </header>
+
+                <div class="card table-card full-width">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>MUG</th>
+                                    <th>Nómina</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Puesto</th>
+                                    <th>Área / Planta</th>
+                                    <th>Correo Asignado IT</th>
+                                    <th>Responsable IT</th>
+                                    <th>Fecha Completada</th>
+                                    <th style="text-align: center;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="it-completadas-tbody">
+                                <!-- Llenado por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Reportes IT View -->
+            <div id="view-reports" class="view-section">
+                <header class="header">
+                    <div class="header-titles">
+                        <h1>Panel de Reportes IT</h1>
+                        <p>Generación de reportes ejecutivos e impresión PDF</p>
+                    </div>
+                    <button id="btn-download-pdf" class="btn-primary">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2"
+                            fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Descargar PDF
+                    </button>
+                </header>
+
+                <div id="pdf-container" class="pdf-container card">
+                    <div class="pdf-header safran-executive-header">
+                        <div class="safran-logo-wrapper">
+                            <img src="assets/images/Safran-logo.png" alt="Safran Logo" class="safran-header-logo">
+                        </div>
+                        <div class="safran-header-titles">
+                            <div class="safran-doc-badge">DOCUMENTO OFICIAL • SERVICE DESK IT</div>
+                            <h2 id="pdf-title">Reporte de Ingresos y Credenciales IT</h2>
+                            <p id="pdf-date">Fecha de generación: </p>
+                        </div>
+                    </div>
+
+                    <div class="pdf-summary kpi-top-row" style="margin-bottom: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="card kpi-card" style="padding: 0.85rem 1rem;">
+                            <div class="kpi-info" style="width: 100%;">
+                                <span class="kpi-label">Ingresos Totales (Histórico)</span>
+                                <span id="pdf-kpi-historico" class="kpi-value">0</span>
+                            </div>
+                        </div>
+                        <div class="card kpi-card" style="padding: 0.85rem 1rem;">
+                            <div class="kpi-info" style="width: 100%;">
+                                <span class="kpi-label">Ingresos del Mes</span>
+                                <span id="pdf-kpi-mensual" class="kpi-value">0</span>
+                            </div>
+                        </div>
+                        <div class="card kpi-card" style="padding: 0.85rem 1rem;">
+                            <div class="kpi-info" style="width: 100%;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.2rem;">
+                                    <span class="kpi-label" style="color: #2563eb; font-weight: 600;">Ingresos de la Semana</span>
+                                    <span id="pdf-kpi-semanal-rango" style="font-size: 0.75rem; font-weight: 600; color: #2563eb; background: rgba(37,99,235,0.1); padding: 0.15rem 0.45rem; border-radius: 6px; border: 1px solid rgba(37,99,235,0.2);"></span>
+                                </div>
+                                <span id="pdf-kpi-semanal" class="kpi-value" style="color: #2563eb;">0</span>
+                            </div>
+                        </div>
+                        <div class="card kpi-card" style="padding: 0.85rem 1rem;">
+                            <div class="kpi-info" style="width: 100%;">
+                                <span class="kpi-label" style="color: #059669;">Ingresos por Planta</span>
+                                <div id="pdf-kpi-plantas" style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.35rem;">
+                                    <!-- Llenado dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pdf-charts-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="pdf-chart-card card" style="padding: 0.85rem;">
+                            <div class="chart-header-controls"
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <h4 class="pdf-chart-title" style="margin: 0;">Distribución por Área</h4>
+                                <select id="pie-period" class="mini-select">
+                                    <option value="report_week" selected>Semana de Reporte</option>
+                                    <option value="last-upload">Última Carga</option>
+                                    <option value="monthly">Mes Actual</option>
+                                    <option value="all">Todo el Histórico</option>
+                                </select>
+                            </div>
+                            <div class="chart-container" style="height: 190px;">
+                                <canvas id="pdfChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="pdf-chart-card card" style="padding: 0.85rem;">
+                            <div class="chart-header-controls" style="margin-bottom: 0.35rem;">
+                                <h4 class="pdf-chart-title" style="margin: 0;">Tendencia de Ingresos</h4>
+                            </div>
+                            <div style="padding: 0 0.5rem; text-align: left;">
+                                <span
+                                    style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Total
+                                    en Periodo</span>
+                                <div id="timeline-kpi-value"
+                                    style="font-size: 2rem; font-weight: 800; color: #2563eb; line-height: 1;">0</div>
+                            </div>
+                            <div class="chart-container" style="height: 150px; margin-top: 0.35rem;">
+                                <canvas id="pdfTimelineChart"></canvas>
+                            </div>
+                        </div>
+                    <!-- Filtros y Selección Personalizada de Usuarios para el PDF -->
+                    <div class="pdf-table-header-controls">
+                        <!-- Fila 1: Filtros de la Tabla -->
+                        <div class="pdf-controls-row">
+                            <div class="filter-group-title">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                <span>Filtrar Registros:</span>
+                            </div>
+                            <div class="filter-selects-group">
+                                <select id="table-period" class="mini-select">
+                                    <option value="report_week" selected>Ingresos de la Semana (Actual)</option>
+                                    <option value="monthly">Mes Actual</option>
+                                    <option value="all">Todo el Histórico</option>
+                                </select>
+                                <select id="table-planta" class="mini-select planta-select">
+                                    <option value="all">Todas las Plantas</option>
+                                </select>
+                                <select id="table-area" class="mini-select area-select">
+                                    <option value="all">Todas las Áreas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="pdf-controls-divider"></div>
+
+                        <!-- Fila 2: Acciones de Selección y Exportación -->
+                        <div class="pdf-controls-row">
+                            <div class="selection-tools-group">
+                                <button type="button" id="btn-pdf-select-all" class="btn-control-secondary" title="Seleccionar todos los usuarios visibles">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    Seleccionar Todos
+                                </button>
+                                <button type="button" id="btn-pdf-deselect-all" class="btn-control-secondary" title="Deseleccionar todos">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    Deseleccionar Todos
+                                </button>
+                                <span id="pdf-selection-counter" class="badge-status completada">0 de 0 Seleccionados</span>
+                            </div>
+                            <div class="export-actions-group">
+                                <button type="button" id="btn-export-excel" class="btn-success-emerald" title="Exportar la selección a archivo Excel .xlsx">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
+                                    Exportar Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pdf-table-wrapper" style="margin-top: 1rem;">
+                        <div class="pdf-table-print-header" style="display: none; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-main);">Detalle de Registros de Usuarios y Credenciales IT</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">SAFRAN SERVICE DESK IT • PÁGINA 2</div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="pdf-table">
+                                <thead>
+                                    <tr>
+                                        <th class="pdf-select-col" style="width: 40px; text-align: center;">
+                                            <input type="checkbox" id="pdf-check-all-rows" checked title="Seleccionar/Deseleccionar todos">
+                                        </th>
+                                        <th>MUG</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Área</th>
+                                        <th>Planta</th>
+                                        <th>Fecha de Registro / Ingreso</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Notificaciones IT View -->
+            <div class="view-section" id="view-notificaciones">
+                <header class="header">
+                    <div class="header-titles">
+                        <h1>Centro de Notificaciones IT</h1>
+                        <p>Historial de avisos del sistema</p>
+                    </div>
+                    <button class="btn-secondary" id="btn-page-mark-all-read"
+                        style="display: flex; align-items: center; gap: 0.4rem;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2"
+                            fill="none">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        Marcar todo como leído
+                    </button>
+                </header>
+                <div class="card full-width" style="padding: 0; overflow: hidden;" id="full-notif-container">
+                    <div style="padding: 3rem; text-align: center; color: var(--text-muted);">Cargando notificaciones...
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Formulario Configuración Individual IT -->
+    <div class="modal-overlay" id="modal-config-it">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Configurar Credenciales IT</h2>
+                <button class="btn-close-modal" id="btn-close-config-it">&times;</button>
+            </div>
+            <form id="form-config-it" style="padding: 1.5rem;">
+                <input type="hidden" id="it_id_config">
+                <input type="hidden" id="it_id_ingreso">
+
+                <div
+                    style="background: var(--bg-main); padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.85rem; border: 1px solid var(--card-border);">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.2rem;"
+                        id="info-emp-nombre">Nombre Empleado</div>
+                    <div style="color: var(--text-muted);" id="info-emp-mug">MUG / Nómina</div>
+                    <div style="color: var(--text-muted); margin-top: 0.3rem;" id="info-emp-puesto">Puesto</div>
+                    <div style="color: var(--text-muted);" id="info-emp-area">Área (Planta)</div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="it_correo_asignado">Correo Electrónico Asignado *</label>
+                    <input type="email" id="it_correo_asignado" required placeholder="ejemplo@empresa.com"
+                        class="form-control" style="width: 100%; padding: 0.6rem;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="it_password_asignado">Contraseña Temporal *</label>
+                    <input type="text" id="it_password_asignado" required placeholder="QueretaroMex2026*"
+                        class="form-control" style="width: 100%; padding: 0.6rem;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="it_notas">Notas Adicionales</label>
+                    <textarea id="it_notas" placeholder="Instrucciones o detalles de cuenta..." class="form-control"
+                        style="width: 100%; padding: 0.6rem; height: 70px;"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancel-config">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="btn-save-config">Guardar Configuración</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts Modulares -->
+    <script src="js/auth.js?v=36"></script>
+    <script src="js/ui.js?v=56"></script>
+    <script src="js/dashboard.js?v=36"></script>
+    <script src="js/reports.js?v=70"></script>
+    <script src="js/notificaciones.js?v=36"></script>
+    <script src="js/it/it_core.js?v=29"></script>
+    <script src="js/it/it_altas.js?v=190"></script>
+</body>
+
+</html>

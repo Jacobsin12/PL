@@ -1,0 +1,254 @@
+/* Estilos Específicos para Dashboard IT */
+
+/* Status Badges */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge-status.pendiente {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-status.en_proceso {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-status.completada {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Checklist Items */
+.checklist-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    background: var(--bg-main);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.checklist-item:hover {
+    background: var(--nav-hover);
+}
+
+.checklist-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    font-weight: 500;
+    user-select: none;
+}
+
+/* Switches para checklist */
+.switch-mini {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch-mini input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-mini {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--card-border);
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.slider-mini:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider-mini {
+    background-color: #10b981;
+}
+
+input:checked + .slider-mini:before {
+    transform: translateX(20px);
+}
+
+/* Notification Bell Dropdown */
+.notif-container {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-bell {
+    position: relative;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-bell:hover {
+    background-color: var(--nav-hover);
+}
+
+.notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 4px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--card-bg);
+}
+
+.notif-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 340px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeInNotif 0.25s ease-out;
+}
+
+@keyframes fadeInNotif {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.notif-dropdown.show {
+    display: flex;
+}
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    background-color: var(--nav-hover);
+}
+
+.notif-header h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+.btn-mark-all {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-mark-all:hover {
+    color: #3b82f6;
+}
+
+.notif-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.notif-item:hover {
+    background-color: var(--nav-hover);
+}
+
+.notif-item.unread {
+    background-color: rgba(59, 130, 246, 0.08);
+}
+
+.notif-item-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.notif-item-msg {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.notif-item-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-top: 0.3rem;
+}
+
+.notif-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}

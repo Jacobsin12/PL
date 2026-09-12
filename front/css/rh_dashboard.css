@@ -1,0 +1,980 @@
+/* Estilos Específicos para RH Dashboard */
+
+.rh-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input, 
+.form-group select {
+    padding: 0.8rem 1rem;
+    background-color: var(--bg-main);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    outline: none;
+    border-color: var(--text-main);
+    box-shadow: 0 0 0 3px var(--primary-blue-glow);
+}
+
+/* Modal Estilos Premium */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    display: flex;
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 650px;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-small {
+    max-width: 400px;
+}
+
+.modal-extra-large {
+    max-width: 950px;
+    width: 94%;
+}
+
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-close-modal:hover {
+    color: var(--text-main);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background-color: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-main);
+}
+
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--text-main);
+    border: none;
+    color: var(--bg-main);
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Table action buttons */
+.btn-edit, .btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-edit {
+    color: var(--text-main);
+    background-color: var(--nav-hover);
+}
+
+.btn-edit:hover {
+    background-color: var(--nav-active);
+}
+
+.btn-delete {
+    color: var(--text-main);
+    background-color: var(--nav-hover);
+}
+
+.btn-delete:hover {
+    background-color: var(--nav-active);
+}
+
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+/* ======================================
+   TABS NAVIGATION
+   ====================================== */
+.tabs-nav {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    top: 1px;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+}
+
+.tab-btn.active {
+    color: var(--text-main);
+    border-bottom-color: #2563eb;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+    animation: tabSlideIn 0.35s ease-out;
+}
+
+@keyframes tabSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ======================================
+   INLINE BULK GRID (Excel-like, in-page)
+   ====================================== */
+.inline-bulk-container {
+    margin-top: 1.5rem;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    background: var(--card-bg);
+    overflow: hidden;
+    animation: bulkSlideDown 0.4s ease-out;
+}
+
+@keyframes bulkSlideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        max-height: 2000px;
+        transform: translateY(0);
+    }
+}
+
+.inline-bulk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--card-border);
+    background: var(--nav-hover);
+}
+
+.excel-grid-container {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.excel-grid {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 2600px;
+}
+
+.excel-grid th {
+    background-color: var(--nav-hover);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--card-border);
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.excel-grid td {
+    padding: 0;
+    border: 1px solid var(--card-border);
+    position: relative;
+    background-color: var(--card-bg);
+}
+
+.excel-grid input,
+.excel-grid select {
+    width: 100%;
+    height: 100%;
+    padding: 0.6rem 0.5rem;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    outline: none;
+    border-radius: 0;
+}
+
+.excel-grid input:focus,
+.excel-grid select:focus {
+    box-shadow: inset 0 0 0 2px #2563eb;
+    background-color: var(--bg-main);
+    z-index: 2;
+    position: relative;
+}
+
+.excel-grid .row-number {
+    background-color: var(--nav-hover);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: center;
+    width: 40px;
+    padding: 0.6rem 0;
+}
+
+/* Staggered row animation */
+.excel-grid tbody tr {
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: rowSlideIn 0.35s ease-out forwards;
+}
+
+@keyframes rowSlideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ======================================
+   NUMBER INPUT MODAL
+   ====================================== */
+.input-num-filas {
+    width: 120px;
+    padding: 1rem;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-body);
+    background-color: var(--bg-main);
+    border: 2px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    transition: border-color 0.3s ease;
+}
+
+.input-num-filas:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+/* ======================================
+   ALTAS - Controls & View Modes
+   ====================================== */
+.altas-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.altas-view-modes {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 0.25rem;
+}
+
+.view-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+}
+
+.view-mode-btn:hover {
+    color: var(--text-main);
+}
+
+.view-mode-btn.active {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* ======================================
+   ALTAS - Carga Blocks
+   ====================================== */
+.carga-block {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    animation: blockFadeIn 0.4s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes blockFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.carga-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    background: var(--nav-hover);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    gap: 1rem;
+}
+
+.carga-block-header:hover {
+    background: var(--nav-active);
+}
+
+.carga-block-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.carga-block-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.carga-block-title h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.carga-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    background: rgba(37, 99, 235, 0.12);
+    color: #2563eb;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: 20px;
+    line-height: 1;
+}
+
+.badge-status-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.btn-add-ingreso-block,
+.btn-email-carga,
+.btn-export-carga,
+.btn-enviar-carga-rh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 32px;
+    padding: 0 0.85rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-add-ingreso-block {
+    background: var(--card-bg, #ffffff);
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-add-ingreso-block:hover {
+    background: #f0f9ff;
+    border-color: #38bdf8;
+    color: #0369a1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(2, 132, 199, 0.15);
+}
+
+.btn-add-ingreso-block:active {
+    transform: translateY(0);
+}
+
+.btn-email-carga {
+    background: #0078d4;
+    color: #ffffff;
+    border: 1px solid #0078d4;
+    box-shadow: 0 1px 3px rgba(0, 120, 212, 0.25);
+}
+
+.btn-email-carga:hover {
+    background: #0063b1;
+    border-color: #0063b1;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 120, 212, 0.35);
+}
+
+.btn-email-carga:active {
+    transform: translateY(0);
+}
+
+.btn-export-carga {
+    background: #059669;
+    color: #ffffff;
+    border: 1px solid #059669;
+    box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
+}
+
+.btn-export-carga:hover {
+    background: #047857;
+    border-color: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(5, 150, 105, 0.3);
+}
+
+.btn-export-carga:active {
+    transform: translateY(0);
+}
+
+.btn-enviar-carga-rh {
+    background: #059669;
+    color: #ffffff;
+    border: 1px solid #059669;
+    box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
+}
+
+.btn-enviar-carga-rh:hover {
+    background: #047857;
+    border-color: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(5, 150, 105, 0.3);
+}
+
+.btn-enviar-carga-rh:active {
+    transform: translateY(0);
+}
+
+.carga-chevron {
+    transition: transform 0.3s ease;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.carga-block.collapsed .carga-chevron {
+    transform: rotate(-90deg);
+}
+
+.carga-block-body {
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+    max-height: 2000px;
+    opacity: 1;
+}
+
+.carga-block.collapsed .carga-block-body {
+    max-height: 0;
+    opacity: 0;
+}
+
+.carga-block-body .table-responsive {
+    border-top: 1px solid var(--card-border);
+}
+
+.altas-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+
+.altas-empty svg {
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}
+
+.altas-empty p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Custom Stepper Layout & Zoom Animation */
+.custom-stepper-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: var(--card-bg, #ffffff);
+    border: 2px solid var(--card-border, #cbd5e1);
+    border-radius: 20px;
+    padding: 0.6rem 1.2rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.custom-stepper-container:focus-within,
+.custom-stepper-container:hover {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15), 0 12px 28px -5px rgba(2, 132, 199, 0.12);
+}
+
+.stepper-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border, #cbd5e1);
+    background: var(--nav-hover, #f8fafc);
+    color: var(--text-main, #0f172a);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stepper-btn:hover {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+}
+
+.stepper-btn:active {
+    transform: scale(0.92);
+}
+
+.stepper-value-box {
+    position: relative;
+    width: 90px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.input-num-filas {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-main, #0f172a);
+    font-family: 'Outfit', sans-serif;
+    outline: none;
+    -moz-appearance: textfield;
+    transition: color 0.2s ease;
+    will-change: transform;
+}
+
+.input-num-filas::-webkit-outer-spin-button,
+.input-num-filas::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Animations Zoom Up & Down */
+.animate-zoom-up {
+    animation: numZoomUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards;
+}
+
+.animate-zoom-down {
+    animation: numZoomDown 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.4) forwards;
+}
+
+@keyframes numZoomUp {
+    0% {
+        transform: scale(1) translateY(0);
+        color: var(--text-main, #0f172a);
+    }
+    40% {
+        transform: scale(1.5) translateY(-5px);
+        color: #0284c7;
+        text-shadow: 0 6px 15px rgba(2, 132, 199, 0.4);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        color: var(--text-main, #0f172a);
+    }
+}
+
+@keyframes numZoomDown {
+    0% {
+        transform: scale(1) translateY(0);
+        color: var(--text-main, #0f172a);
+    }
+    40% {
+        transform: scale(0.6) translateY(5px);
+        color: #ef4444;
+        text-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        color: var(--text-main, #0f172a);
+    }
+}
+
+/* Custom Formats & Form Extensions */
+.form-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-color, #00529b);
+    margin: 1.5rem 0 0.75rem 0;
+    padding-bottom: 0.35rem;
+    border-bottom: 2px solid rgba(0, 82, 155, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.format-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: 1px solid var(--card-border, #e2e8f0);
+    border-radius: 8px;
+    background: var(--bg-main, #f8fafc);
+    color: var(--text-muted, #64748b);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.format-tab-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    transition: transform 0.2s ease;
+}
+
+.format-tab-btn:hover {
+    border-color: var(--primary-color, #00529b);
+    color: var(--primary-color, #00529b);
+}
+
+.format-tab-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.format-tab-btn.active {
+    background: var(--primary-color, #00529b);
+    color: #ffffff;
+    border-color: var(--primary-color, #00529b);
+    box-shadow: 0 4px 12px rgba(0, 82, 155, 0.2);
+}
+
+.btn-formats {
+    background: #0284c7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* ====================================================
+   HIGHLIGHT HORIZONTAL Y EXPANSIÓN ANIMADA DE CELDA ACTIVA
+   ==================================================== */
+
+/* 1. Transición suave de ancho para todas las celdas <td> */
+.excel-grid td,
+.table-multiple-input td {
+    transition: min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+    min-width: 100px;
+}
+
+/* 2. Expansión horizontal suave de la celda enfocado */
+.excel-grid td:focus-within,
+.table-multiple-input td:focus-within {
+    min-width: 240px !important;
+    z-index: 15;
+    position: relative;
+}
+
+/* Excepción para número de fila */
+.excel-grid td.row-number:focus-within,
+.table-multiple-input td:first-child:focus-within,
+.table-multiple-input td:last-child:focus-within {
+    min-width: 40px !important;
+}
+
+/* 3. Transición de animación para inputs y selects */
+.excel-grid input,
+.excel-grid select,
+.table-multiple-input input,
+.table-multiple-input select {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 4. Resaltado horizontal de la fila completa en azul cielo */
+#bulk-tbody tr:focus-within,
+#table-multiple tbody tr:focus-within,
+.excel-grid tbody tr:focus-within,
+.table-multiple-input tbody tr:focus-within,
+#bulk-tbody tr.row-active,
+#table-multiple tbody tr.row-active,
+.excel-grid tbody tr.row-active,
+.table-multiple-input tbody tr.row-active {
+    background-color: #e0f2fe !important;
+    box-shadow: inset 4px 0 0 #0284c7 !important;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#bulk-tbody tr:focus-within td,
+#table-multiple tbody tr:focus-within td,
+.excel-grid tbody tr:focus-within td,
+.table-multiple-input tbody tr:focus-within td,
+#bulk-tbody tr.row-active td,
+#table-multiple tbody tr.row-active td,
+.excel-grid tbody tr.row-active td,
+.table-multiple-input tbody tr.row-active td {
+    background-color: #e0f2fe !important;
+}
+
+#bulk-tbody tr:focus-within input,
+#bulk-tbody tr:focus-within select,
+#table-multiple tbody tr:focus-within input,
+#table-multiple tbody tr:focus-within select,
+.excel-grid tbody tr:focus-within input,
+.excel-grid tbody tr:focus-within select,
+#bulk-tbody tr.row-active input,
+#bulk-tbody tr.row-active select,
+#table-multiple tbody tr.row-active input,
+#table-multiple tbody tr.row-active select,
+.excel-grid tbody tr.row-active input,
+.excel-grid tbody tr.row-active select {
+    background-color: #e0f2fe !important;
+    color: #0f172a !important;
+    border-color: #93c5fd !important;
+}
+
+#bulk-tbody tr:focus-within td.row-number,
+#table-multiple tbody tr:focus-within td:first-child,
+.excel-grid tbody tr:focus-within td.row-number,
+#bulk-tbody tr.row-active td.row-number,
+#table-multiple tbody tr.row-active td:first-child,
+.excel-grid tbody tr.row-active td.row-number {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+/* 5. Celda activa enfocada: Pop suave 3D en blanco con borde azul brillante */
+#bulk-tbody tr input:focus,
+#bulk-tbody tr select:focus,
+#table-multiple tbody tr input:focus,
+#table-multiple tbody tr select:focus,
+.excel-grid tbody tr input:focus,
+.excel-grid tbody tr select:focus {
+    background-color: #ffffff !important;
+    border-color: #0284c7 !important;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35), 0 0 0 3.5px rgba(2, 132, 199, 0.25) !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    transform: scale(1.03);
+    z-index: 25;
+    position: relative;
+}
+
+/* ======================================
+   FORZAR TEXTO Y PLACEHOLDERS EN MAYÚSCULAS
+   ====================================== */
+#form-empleado input[type="text"],
+#form-empleado textarea,
+#form-bulk input[type="text"],
+#form-bulk textarea,
+#inline-bulk-container input[type="text"],
+.table-multiple input[type="text"] {
+    text-transform: uppercase;
+}
+
+#form-empleado input[type="text"]::placeholder,
+#form-empleado textarea::placeholder,
+#form-bulk input[type="text"]::placeholder,
+#form-bulk textarea::placeholder,
+#inline-bulk-container input[type="text"]::placeholder,
+.table-multiple input[type="text"]::placeholder {
+    text-transform: uppercase;
+}
+
