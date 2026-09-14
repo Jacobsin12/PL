@@ -107,12 +107,22 @@ CREATE TABLE IF NOT EXISTS configuracion_it (
     id_ingreso INT NOT NULL REFERENCES ingresos(id_ingreso) ON DELETE CASCADE,
     correo_asignado VARCHAR(150) NULL,
     password_asignado VARCHAR(100) NULL,
+    correo_creado BOOLEAN DEFAULT FALSE,
+    password_configurada BOOLEAN DEFAULT FALSE,
+    permisos_ad BOOLEAN DEFAULT FALSE,
+    equipo_entregado BOOLEAN DEFAULT FALSE,
     config_completada BOOLEAN DEFAULT FALSE,
     id_responsable_it INT NULL REFERENCES usuarios_sistema(id_usuario),
     fecha_completada TIMESTAMP NULL,
     estatus VARCHAR(30) DEFAULT 'pendiente',
     notas VARCHAR(500) NULL
 );
+
+-- Asegurar columnas si la tabla ya existía
+ALTER TABLE configuracion_it ADD COLUMN IF NOT EXISTS correo_creado BOOLEAN DEFAULT FALSE;
+ALTER TABLE configuracion_it ADD COLUMN IF NOT EXISTS password_configurada BOOLEAN DEFAULT FALSE;
+ALTER TABLE configuracion_it ADD COLUMN IF NOT EXISTS permisos_ad BOOLEAN DEFAULT FALSE;
+ALTER TABLE configuracion_it ADD COLUMN IF NOT EXISTS equipo_entregado BOOLEAN DEFAULT FALSE;
 
 -- Tabla: notificaciones
 CREATE TABLE IF NOT EXISTS notificaciones (
