@@ -241,12 +241,20 @@ window.renderChart = function(dataObj, canvasId, instance, setInstanceCallback) 
     const ctx = canvas.getContext('2d');
     
     const sortedAreas = Object.entries(dataObj).sort((a, b) => b[1] - a[1]);
-    const labels = sortedAreas.map(item => item[0]);
-    const data = sortedAreas.map(item => item[1]);
+    let labels = sortedAreas.map(item => item[0]);
+    let data = sortedAreas.map(item => item[1]);
+    const isDark = document.body.classList.contains('dark-mode');
+    
+    let bgColors = ['#0f172a', '#1e293b', '#2563eb', '#3b82f6', '#475569', '#6366f1', '#0ea5e9', '#8b5cf6', '#64748b', '#94a3b8'];
+    
+    if (labels.length === 0) {
+        labels = ['Sin registros en el periodo'];
+        data = [1];
+        bgColors = [isDark ? '#334155' : '#e2e8f0'];
+    }
 
     if (instance) instance.destroy();
 
-    const isDark = document.body.classList.contains('dark-mode');
     Chart.defaults.color = isDark ? '#a1a1aa' : '#64748b';
     Chart.defaults.font.family = "'Inter', sans-serif";
 
@@ -256,7 +264,7 @@ window.renderChart = function(dataObj, canvasId, instance, setInstanceCallback) 
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: ['#0f172a', '#1e293b', '#2563eb', '#3b82f6', '#475569', '#6366f1', '#0ea5e9', '#8b5cf6', '#64748b', '#94a3b8'],
+                backgroundColor: bgColors,
                 borderWidth: 2,
                 borderColor: isDark ? '#141414' : '#ffffff'
             }]
@@ -265,7 +273,15 @@ window.renderChart = function(dataObj, canvasId, instance, setInstanceCallback) 
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: true, position: 'right', labels: { boxWidth: 15, font: { size: 11 } } }
+                legend: { display: true, position: 'right', labels: { boxWidth: 15, font: { size: 11 } } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (labels[0] === 'Sin registros en el periodo') return ' 0 ingresos';
+                            return ' ' + context.parsed + ' ingresos';
+                        }
+                    }
+                }
             }
         }
     });

@@ -62,7 +62,29 @@ window.RH.initDirectorio = function() {
     // MODAL EMPLEADO INDIVIDUAL (Nuevo / Editar)
     // ============================================
     window.RH.openModal = function() {
-        if(window.RH.DOM.modalEmpleado) window.RH.DOM.modalEmpleado.classList.add('show');
+        if(window.RH.DOM.modalEmpleado) {
+            window.RH.DOM.modalEmpleado.classList.add('show');
+            
+            // Auto-restaurar borrador solo si es un "Nuevo Empleado" (id_ingreso está vacío)
+            const idIngresoEl = document.getElementById('id_ingreso');
+            if (idIngresoEl && !idIngresoEl.value && window.RH.DOM.formEmpleado) {
+                const draft = sessionStorage.getItem('rh_empleado_draft');
+                if (draft) {
+                    try {
+                        const data = JSON.parse(draft);
+                        Object.keys(data).forEach(key => {
+                            const el = window.RH.DOM.formEmpleado.elements[key];
+                            if (el && el.type !== 'hidden' && el.name !== 'fecha_registro') {
+                                el.value = data[key];
+                            }
+                        });
+                        console.log("Borrador restaurado.");
+                    } catch(e) {
+                        console.error("Error al restaurar borrador:", e);
+                    }
+                }
+            }
+        }
     };
     
     window.RH.closeModal = function() {
@@ -103,6 +125,16 @@ window.RH.initDirectorio = function() {
     if (window.RH.DOM.btnCancelar) window.RH.DOM.btnCancelar.addEventListener('click', window.RH.closeModal);
 
     if (window.RH.DOM.formEmpleado) {
+        // Autoguardado en sessionStorage cuando el usuario escribe (solo para nuevos ingresos)
+        window.RH.DOM.formEmpleado.addEventListener('input', () => {
+            const idIngresoEl = document.getElementById('id_ingreso');
+            if (idIngresoEl && !idIngresoEl.value) {
+                const formData = new FormData(window.RH.DOM.formEmpleado);
+                const data = Object.fromEntries(formData.entries());
+                sessionStorage.setItem('rh_empleado_draft', JSON.stringify(data));
+            }
+        });
+
         window.RH.DOM.formEmpleado.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -121,6 +153,9 @@ window.RH.initDirectorio = function() {
                 
                 const json = await res.json();
                 if (json.status === 'success') {
+                    // Limpiar el borrador al guardar exitosamente
+                    sessionStorage.removeItem('rh_empleado_draft');
+                    
                     const savedId = isEdit ? data.id_ingreso : (json.inserted_ids && json.inserted_ids[0] ? json.inserted_ids[0] : null);
                     window.RH.closeModal();
                     await window.RH.loadEmpleados();

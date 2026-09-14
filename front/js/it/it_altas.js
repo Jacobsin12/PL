@@ -93,7 +93,8 @@ async function loadITPendientes() {
                     badgeNav.innerText = window.IT.pendientesData.length;
                     badgeNav.style.display = 'inline-flex';
                 } else {
-                    badgeNav.style.display = 'none';
+                    badgeNav.innerText = '';
+                    badgeNav.style.setProperty('display', 'none', 'important');
                 }
             }
 

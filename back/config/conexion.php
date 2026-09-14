@@ -9,7 +9,7 @@ $pwd = "0512"; // Contraseña de SQL Server
 
 try {
     // Se establece la conexión utilizando PDO_SQLSRV
-    $conn = new PDO("sqlsrv:server=$serverName;Database=$database;TrustServerCertificate=true", $uid, $pwd);
+    $conn = new PDO("sqlsrv:server=$serverName;Database=$database;TrustServerCertificate=true");
     
     // Configurar PDO para que lance excepciones en caso de error
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

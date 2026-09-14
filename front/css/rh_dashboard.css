@@ -978,3 +978,16 @@
     text-transform: uppercase;
 }
 
+/* Animación Email Overlay */
+.email-animation-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
+.email-animation-overlay.show { opacity: 1; }
+.email-animation-content { position: relative; text-align: center; }
+.email-envelope { color: #38bdf8; position: relative; z-index: 2; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+.email-letter { position: absolute; top: 15px; left: 15px; width: 50px; height: 35px; background: white; border-radius: 4px; z-index: 1; opacity: 0; border: 1px solid #e2e8f0; }
+.email-success-text { color: white; font-weight: 600; font-size: 1.2rem; margin-top: 1rem; opacity: 0; transform: translateY(10px); }
+.email-animating .email-letter { animation: slideInLetter 1.2s forwards; }
+.email-animating .email-envelope { animation: flyAway 1.2s forwards; animation-delay: 1.2s; }
+.email-animating .email-success-text { animation: fadeInUp 0.5s forwards; animation-delay: 1.5s; }
+@keyframes slideInLetter { 0% { transform: translateY(-50px) scale(0.8); opacity: 0; z-index: 3; } 30% { transform: translateY(-30px) scale(0.9); opacity: 1; z-index: 3; } 50% { z-index: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; z-index: 1; } }
+@keyframes flyAway { 0% { transform: scale(1) translateX(0); opacity: 1; } 20% { transform: scale(1.1) translateX(-10px); } 100% { transform: scale(0) translateX(200px) translateY(-100px); opacity: 0; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

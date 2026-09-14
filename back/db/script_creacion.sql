@@ -52,6 +52,22 @@ CREATE TABLE ingresos (
     id_tipo INT,
     fecha_ingreso DATE NOT NULL,
     fecha_registro DATETIME DEFAULT GETDATE(),
+    imss VARCHAR(50) NULL,
+    curp VARCHAR(50) NULL,
+    domicilio VARCHAR(255) NULL,
+    tipo_alta VARCHAR(50) DEFAULT 'Nuevo Ingreso',
+    tarjeta_solicitada VARCHAR(100) NULL,
+    numero_tarjeta VARCHAR(50) NULL,
+    ruta_acceso VARCHAR(100) NULL,
+    ruta_entrada VARCHAR(100) NULL,
+    parada_entrada VARCHAR(100) NULL,
+    ruta_salida VARCHAR(100) NULL,
+    parada_salida VARCHAR(100) NULL,
+    talla_zapato VARCHAR(50) NULL,
+    talla_pantalon VARCHAR(50) NULL,
+    talla_playera VARCHAR(50) NULL,
+    camisola VARCHAR(100) NULL,
+    sobrelente VARCHAR(50) NULL,
     
     CONSTRAINT FK_Ingreso_Planta FOREIGN KEY (id_planta) REFERENCES planta(id_planta),
     CONSTRAINT FK_Ingreso_Area FOREIGN KEY (id_area) REFERENCES area(id_area),
@@ -113,13 +129,44 @@ INSERT INTO roles (nombre_rol) VALUES ('IT');
 GO
 
 -- Insertar usuarios del sistema de prueba (La contraseña para todos es '12345' encriptada con bcrypt)
--- password_hash = $2y$10$wO0oH7tXF8v1... (hash de '12345')
+-- password_hash = $2y$10$s.37eY2Fz2PptNbwSe8yYu7Yn1Vi5DooNs8oXb7i50P958xMoyu1W (hash de '12345')
 INSERT INTO usuarios_sistema (nombre, correo, password_hash, id_rol) 
-VALUES ('Administrador', 'admin@safran.com', '$2y$10$N.Qp.x8oR1Z.T2o1k1xZ9eU8vN1yH9d7XlGZ1zJ5kC7pA9t/M8y0O', 1);
+VALUES ('Administrador', 'admin@safran.com', '$2y$10$s.37eY2Fz2PptNbwSe8yYu7Yn1Vi5DooNs8oXb7i50P958xMoyu1W', 1);
 
 INSERT INTO usuarios_sistema (nombre, correo, password_hash, id_rol) 
-VALUES ('Recursos Humanos', 'rh@safran.com', '$2y$10$N.Qp.x8oR1Z.T2o1k1xZ9eU8vN1yH9d7XlGZ1zJ5kC7pA9t/M8y0O', 2);
+VALUES ('Recursos Humanos', 'rh@safran.com', '$2y$10$s.37eY2Fz2PptNbwSe8yYu7Yn1Vi5DooNs8oXb7i50P958xMoyu1W', 2);
 
 INSERT INTO usuarios_sistema (nombre, correo, password_hash, id_rol) 
-VALUES ('Soporte IT', 'it@safran.com', '$2y$10$N.Qp.x8oR1Z.T2o1k1xZ9eU8vN1yH9d7XlGZ1zJ5kC7pA9t/M8y0O', 3);
+VALUES ('Soporte IT', 'it@safran.com', '$2y$10$s.37eY2Fz2PptNbwSe8yYu7Yn1Vi5DooNs8oXb7i50P958xMoyu1W', 3);
+GO
+
+-- Tabla: configuracion_it (Para el dashboard de IT)
+CREATE TABLE configuracion_it (
+    id_config INT IDENTITY(1,1) PRIMARY KEY,
+    id_ingreso INT NOT NULL,
+    correo_asignado VARCHAR(150) NULL,
+    password_asignado VARCHAR(100) NULL,
+    config_completada BIT DEFAULT 0,
+    id_responsable_it INT NULL,
+    fecha_completada DATETIME NULL,
+    estatus VARCHAR(30) DEFAULT 'pendiente',
+    notas VARCHAR(500) NULL,
+    CONSTRAINT FK_Config_Ingreso FOREIGN KEY (id_ingreso) REFERENCES ingresos(id_ingreso) ON DELETE CASCADE,
+    CONSTRAINT FK_Config_Responsable FOREIGN KEY (id_responsable_it) REFERENCES usuarios_sistema(id_usuario)
+);
+GO
+
+-- Tabla: notificaciones (Para avisos en tiempo real a diferentes roles)
+CREATE TABLE notificaciones (
+    id_notificacion INT IDENTITY(1,1) PRIMARY KEY,
+    id_usuario_destino INT NULL,
+    id_rol_destino INT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    mensaje VARCHAR(500) NOT NULL,
+    leida BIT DEFAULT 0,
+    fecha_creacion DATETIME DEFAULT GETDATE(),
+    url_referencia VARCHAR(200) NULL,
+    CONSTRAINT FK_Notif_Usuario FOREIGN KEY (id_usuario_destino) REFERENCES usuarios_sistema(id_usuario)
+);
 GO

@@ -24,7 +24,20 @@ try {
             $stmt->execute([':userId' => $userId, ':rolId' => $rolId]);
             $res = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            echo json_encode(['status' => 'success', 'unread_count' => (int)$res['total']]);
+            // Get latest unread notification for push purposes
+            $sqlLatest = "SELECT TOP 1 id_notificacion, titulo, mensaje FROM notificaciones 
+                          WHERE leida = 0 
+                          AND (id_usuario_destino = :userId2 OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId2))
+                          ORDER BY id_notificacion DESC";
+            $stmtLatest = $conn->prepare($sqlLatest);
+            $stmtLatest->execute([':userId2' => $userId, ':rolId2' => $rolId]);
+            $latest = $stmtLatest->fetch(PDO::FETCH_ASSOC);
+            
+            echo json_encode([
+                'status' => 'success', 
+                'unread_count' => (int)$res['total'],
+                'latest_unread' => $latest ? $latest : null
+            ]);
         } else {
             $sql = "SELECT TOP 30 * FROM notificaciones 
                     WHERE (id_usuario_destino = :userId OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId))

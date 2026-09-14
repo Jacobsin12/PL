@@ -136,7 +136,8 @@ async function checkNotificationsCount() {
                 badge.innerText = count > 99 ? '99+' : count;
                 badge.style.display = 'flex';
             } else {
-                badge.style.display = 'none';
+                badge.innerText = '';
+                badge.style.setProperty('display', 'none', 'important');
             }
         }
     } catch (err) {

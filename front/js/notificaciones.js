@@ -2,8 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initNotificacionesModule();
 });
 
+window.lastNotifiedId = null;
+
 function initNotificacionesModule() {
     const btnMarkAll = document.getElementById('btn-page-mark-all-read');
+
+    // Solicitar permiso para notificaciones nativas (Push de navegador)
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
 
     if (btnMarkAll) {
         btnMarkAll.addEventListener('click', async () => {
@@ -22,7 +29,7 @@ function initNotificacionesModule() {
     }
 
     updateNotifBadges();
-    setInterval(updateNotifBadges, 30000);
+    setInterval(updateNotifBadges, 15000); // Revisar cada 15 segundos para ser más rápido
 }
 
 /* Actualizar badges de conteo en la barra lateral */
@@ -40,7 +47,27 @@ async function updateNotifBadges() {
                     badgeNav.innerText = count > 99 ? '99+' : count;
                     badgeNav.style.display = 'inline-flex';
                 } else {
-                    badgeNav.style.display = 'none';
+                    badgeNav.innerText = '';
+                    badgeNav.style.setProperty('display', 'none', 'important');
+                }
+            }
+            
+            // Disparar Notificación Nativa Push si hay una nueva
+            if (data.latest_unread && window.lastNotifiedId !== data.latest_unread.id_notificacion) {
+                window.lastNotifiedId = data.latest_unread.id_notificacion;
+                
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const notif = new Notification(data.latest_unread.titulo, {
+                        body: data.latest_unread.mensaje,
+                        icon: 'assets/safran_logo.png' // Asegurar que haya un logo o fallará silenciosamente sin icono
+                    });
+                    
+                    notif.onclick = function() {
+                        window.focus();
+                        this.close();
+                        const btnBell = document.getElementById('btn-nav-notificaciones');
+                        if(btnBell) btnBell.click(); // Abrir panel
+                    };
                 }
             }
         }

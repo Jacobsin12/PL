@@ -110,9 +110,11 @@ window.RH.attachInputValidations = function(container) {
 // Delegación global para asegurar mayúsculas en tiempo real en todos los formularios de ingreso (individual y múltiple)
 document.addEventListener('input', function(e) {
     const target = e.target;
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
         const type = (target.getAttribute('type') || 'text').toLowerCase();
-        if (type === 'text' || type === 'search') {
+        
+        // Lógica de mayúsculas y limpieza
+        if (target.tagName !== 'SELECT' && (type === 'text' || type === 'search' || target.tagName === 'TEXTAREA')) {
             const container = target.closest('#form-empleado, #form-bulk, #inline-bulk-container, .modal-content, .table-multiple');
             if (container) {
                 if (target.name === 'numero_nomina' || target.name === 'numero_nomina[]') {
@@ -124,6 +126,46 @@ document.addEventListener('input', function(e) {
                 }
             }
         }
+
+        // Lógica de Color (Feedback Visual)
+        if (target.closest('.excel-grid, #form-empleado')) {
+            if (target.value.trim() !== '') {
+                target.style.backgroundColor = 'rgba(16, 185, 129, 0.08)'; // Verde clarito
+                target.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+            } else {
+                target.style.backgroundColor = ''; // Restablecer
+                target.style.border = ''; // Restablecer
+            }
+
+            // Verificar si la fila completa está lista (basado en campos required)
+            const tr = target.closest('tr');
+            if (tr) {
+                const requireds = tr.querySelectorAll('input[required], select[required]');
+                let allFilled = true;
+                requireds.forEach(req => {
+                    if(req.value.trim() === '') allFilled = false;
+                });
+                
+                const rowNum = tr.querySelector('.row-number');
+                if (rowNum) {
+                    if (allFilled && requireds.length > 0) {
+                        rowNum.style.backgroundColor = 'rgba(16, 185, 129, 0.2)'; // Verde más fuerte
+                        rowNum.style.color = '#047857';
+                    } else {
+                        rowNum.style.backgroundColor = '';
+                        rowNum.style.color = '';
+                    }
+                }
+            }
+        }
+    }
+});
+
+// También escuchar change para los selects
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.tagName === 'SELECT') {
+        // Disparar manualmente el evento input para que corra la misma lógica
+        e.target.dispatchEvent(new Event('input', { bubbles: true }));
     }
 });
 

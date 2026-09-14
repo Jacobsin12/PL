@@ -17,7 +17,8 @@ window.RH.getStoredEmailConfig = function() {
     return {
         it: { to: 'servicios.it@safrangroup.com', cc: 'rh.notificaciones@safrangroup.com' },
         epp: { to: 'epp.almacen@safrangroup.com', cc: 'hse@safrangroup.com' },
-        badge: { to: 'seguridad.patrimonial@safrangroup.com', cc: 'transporte@safrangroup.com' },
+        badge: { to: 'seguridad.patrimonial@safrangroup.com', cc: '' },
+        transporte: { to: 'transporte@safrangroup.com', cc: '' },
         medico: { to: 'servicio.medico@safrangroup.com', cc: 'rh.notificaciones@safrangroup.com' }
     };
 };
@@ -161,14 +162,21 @@ window.RH.getFormatTemplate = function(formatType, empOrEmps) {
         };
     } else if (formatType === 'badge') {
         return {
-            title: '3. Formato Alta de Badge y Transporte',
-            dest: 'Destinatarios: Seguridad Patrimonial y Transporte',
-            subject: `Alta de Badges y Transporte - Ingresos (${fechaStr})`,
+            title: '3. Formato Alta de Badge (Seguridad Patrimonial)',
+            dest: 'Destinatarios: Seguridad Patrimonial',
+            subject: `Alta de Badges - Ingresos (${fechaStr})`,
+            body: defaultBody
+        };
+    } else if (formatType === 'transporte') {
+        return {
+            title: '4. Formato Alta de Transporte',
+            dest: 'Destinatarios: Transporte',
+            subject: `Alta de Transporte - Ingresos (${fechaStr})`,
             body: defaultBody
         };
     } else if (formatType === 'medico') {
         return {
-            title: '4. Formato Servicio Médico',
+            title: '5. Formato Servicio Médico',
             dest: 'Destinatario: Servicio Médico',
             subject: `Registro Servicio Médico - Ingresos (${fechaStr})`,
             body: defaultBody
@@ -197,14 +205,21 @@ window.RH.getBatchFormatTemplate = function(formatType, emps) {
         };
     } else if (formatType === 'badge') {
         return {
-            title: `3. Formato Badge & Transporte (Carga Masiva - ${count} Colaboradores)`,
-            dest: 'Destinatarios: Seguridad Patrimonial y Transporte',
-            subject: `Alta de Badges y Transporte - Ingresos (${fechaStr})`,
+            title: `3. Formato Badge (Carga Masiva - ${count} Colaboradores)`,
+            dest: 'Destinatarios: Seguridad Patrimonial',
+            subject: `Alta de Badges - Ingresos (${fechaStr})`,
+            body: defaultBody
+        };
+    } else if (formatType === 'transporte') {
+        return {
+            title: `4. Formato Transporte (Carga Masiva - ${count} Colaboradores)`,
+            dest: 'Destinatarios: Transporte',
+            subject: `Alta de Transporte - Ingresos (${fechaStr})`,
             body: defaultBody
         };
     } else if (formatType === 'medico') {
         return {
-            title: `4. Formato Servicio Médico (Carga Masiva - ${count} Colaboradores)`,
+            title: `5. Formato Servicio Médico (Carga Masiva - ${count} Colaboradores)`,
             dest: 'Destinatario: Servicio Médico',
             subject: `Registro Servicio Médico - Ingresos (${fechaStr})`,
             body: defaultBody
@@ -248,6 +263,16 @@ window.RH.switchFormatTab = function(formatType) {
     const tabCfg = cfg[formatType] || { to: '', cc: '' };
     if (toInput) toInput.value = tabCfg.to || '';
     if (ccInput) ccInput.value = tabCfg.cc || '';
+
+    const dropzone = document.getElementById('badge-photo-dropzone');
+    if (dropzone) {
+        if (formatType === 'badge') {
+            dropzone.style.display = 'block';
+            window.RH.renderBadgePhotosList();
+        } else {
+            dropzone.style.display = 'none';
+        }
+    }
 };
 
 // ============================================
@@ -284,6 +309,28 @@ window.RH.openOutlookFormat = function(formatType) {
     const cleanTo = normalizeEmails(toVal);
     const cleanCc = normalizeEmails(ccVal);
 
+    // ZIP GENERATION para fotos de Badge
+    if (currentTab === 'badge' && window.RH.badgePhotos.length > 0 && typeof JSZip !== 'undefined') {
+        const zip = new JSZip();
+        window.RH.badgePhotos.forEach(fileObj => {
+            zip.file(fileObj.file.name, fileObj.file);
+        });
+        zip.generateAsync({ type: 'blob' }).then(function(content) {
+            const url = window.URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Fotos_Badge_${window.RH.badgePhotos.length}_Ingresos_${new Date().toISOString().split('T')[0]}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            if (typeof window.showAlert === 'function') {
+                window.showAlert("El archivo ZIP con las fotos se descargó. Arrástralo al correo que acaba de abrirse.", "ZIP Descargado", "info");
+            }
+        });
+    }
+
     let mailtoUrl = `mailto:${encodeURIComponent(cleanTo)}?`;
     const params = [];
     if (cleanCc) params.push(`cc=${encodeURIComponent(cleanCc)}`);
@@ -291,7 +338,33 @@ window.RH.openOutlookFormat = function(formatType) {
     if (bodyVal) params.push(`body=${encodeURIComponent(bodyVal)}`);
 
     mailtoUrl += params.join('&');
-    window.location.href = mailtoUrl;
+    
+    // Mostrar Animación
+    const overlay = document.getElementById('email-animation-overlay');
+    if (overlay) {
+        overlay.style.display = 'flex';
+        // Forzar reflow
+        void overlay.offsetWidth;
+        overlay.classList.add('show');
+        overlay.querySelector('.email-animation-content').classList.add('email-animating');
+        
+        // Esperar a que la carta entre (1.2s) y el sobre empiece a volar
+        setTimeout(() => {
+            window.location.href = mailtoUrl;
+            
+            // Ocultar después de un tiempo
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.querySelector('.email-animation-content').classList.remove('email-animating');
+                }, 300);
+            }, 1000); // 1 segundo extra para que termine de volar
+            
+        }, 1200);
+    } else {
+        window.location.href = mailtoUrl;
+    }
 };
 
 // ============================================
@@ -375,8 +448,29 @@ window.RH.exportAreaExcel = function(formatType) {
             { header: 'Sobrelente de Seguridad', field: 'sobrelente' }
         ];
     } else if (currentTab === 'badge') {
-        title = "Formato de Alta de Badge (Seguridad Patrimonial) y Transporte";
-        filename = `Formato_Badge_Transporte_${emps.length}_Ingresos`;
+        title = "Formato de Alta de Badge (Seguridad Patrimonial)";
+        filename = `Formato_Badge_${emps.length}_Ingresos`;
+        columns = [
+            { header: 'No. Empleado', field: 'numero_nomina' },
+            { header: 'Nombre Completo', field: 'nombreCompleto' },
+            { header: 'IMSS (NSS)', field: 'imss' },
+            { header: 'CURP', field: 'curp' },
+            { header: 'Planta', field: 'nombre_planta' },
+            { header: 'Área', field: 'nombre_area' },
+            { header: 'Puesto', field: 'puesto' },
+            { header: 'Tipo de Alta', field: 'tipo_alta' },
+            { header: 'Tarjeta Solicitada', field: 'tarjeta_solicitada' },
+            { header: 'No. Tarjeta', field: 'numero_tarjeta' },
+            { header: 'Domicilio Completo', field: 'domicilio' },
+            { header: 'Ruta Acceso', field: 'ruta_acceso' },
+            { header: 'Ruta Entrada', field: 'ruta_entrada' },
+            { header: 'Parada Entrada', field: 'parada_entrada' },
+            { header: 'Ruta Salida', field: 'ruta_salida' },
+            { header: 'Parada Salida', field: 'parada_salida' }
+        ];
+    } else if (currentTab === 'transporte') {
+        title = "Formato de Alta de Transporte";
+        filename = `Formato_Transporte_${emps.length}_Ingresos`;
         columns = [
             { header: 'No. Empleado', field: 'numero_nomina' },
             { header: 'Nombre Completo', field: 'nombreCompleto' },
@@ -453,6 +547,112 @@ window.openBatchFormatsModal = window.RH.openBatchFormatsModal;
 window.closeFormatsModal = window.RH.closeFormatsModal;
 window.switchFormatTab = window.RH.switchFormatTab;
 window.openOutlookFormat = window.RH.openOutlookFormat;
+
+window.RH = window.RH || {};
+window.RH.badgePhotos = [];
+
+// ============================================
+// LÓGICA DE FOTOS DE BADGE (DRAG & DROP)
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    const dropzone = document.getElementById('badge-photo-dropzone');
+    const fileInput = document.getElementById('badge-photo-input');
+
+    if (!dropzone || !fileInput) return;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => dropzone.style.background = 'rgba(14, 165, 233, 0.15)', false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => dropzone.style.background = 'rgba(14, 165, 233, 0.05)', false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        handleFiles(files);
+    });
+
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            if (file.type.startsWith('image/')) {
+                // Verificar si ya existe para reemplazar o agregar
+                const existingIndex = window.RH.badgePhotos.findIndex(f => f.file.name === file.name);
+                if (existingIndex >= 0) {
+                    window.RH.badgePhotos[existingIndex] = { file: file, url: URL.createObjectURL(file) };
+                } else {
+                    window.RH.badgePhotos.push({ file: file, url: URL.createObjectURL(file) });
+                }
+            }
+        });
+        window.RH.renderBadgePhotosList();
+    }
+});
+
+window.RH.renderBadgePhotosList = function() {
+    const listContainer = document.getElementById('badge-photo-list');
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '';
+    
+    // Obtener nóminas actuales si existen
+    const targetEmpData = window.RH.currentBatchEmps || window.RH.currentFormatEmp;
+    let expectedNominas = [];
+    if (targetEmpData) {
+        const emps = Array.isArray(targetEmpData) ? targetEmpData : [targetEmpData];
+        expectedNominas = emps.map(e => String(e.numero_nomina));
+    }
+
+    window.RH.badgePhotos.forEach((fileObj, index) => {
+        const fileNameBase = fileObj.file.name.split('.')[0];
+        const isMatched = expectedNominas.includes(fileNameBase);
+        const matchIcon = isMatched ? 
+            `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#10b981" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>` : 
+            `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#f59e0b" stroke-width="3" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+        
+        const item = document.createElement('div');
+        item.style.display = 'inline-flex';
+        item.style.alignItems = 'center';
+        item.style.gap = '0.4rem';
+        item.style.padding = '0.2rem 0.5rem';
+        item.style.background = isMatched ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)';
+        item.style.border = isMatched ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(245, 158, 11, 0.2)';
+        item.style.borderRadius = '20px';
+        item.style.fontSize = '0.75rem';
+        item.style.color = isMatched ? '#047857' : '#b45309';
+
+        item.innerHTML = `
+            ${matchIcon}
+            <span>${fileObj.file.name}</span>
+            <button type="button" onclick="window.RH.removeBadgePhoto(${index})" style="background:none; border:none; cursor:pointer; color:inherit; display:flex; align-items:center; padding:0 0.2rem;">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        `;
+        listContainer.appendChild(item);
+    });
+};
+
+window.RH.removeBadgePhoto = function(index) {
+    if (window.RH.badgePhotos[index]) {
+        URL.revokeObjectURL(window.RH.badgePhotos[index].url);
+        window.RH.badgePhotos.splice(index, 1);
+        window.RH.renderBadgePhotosList();
+    }
+};
 window.copyFormatTemplate = window.RH.copyFormatTemplate;
 window.exportAreaExcel = window.RH.exportAreaExcel;
 

@@ -141,19 +141,16 @@ window.RH.initAltas = function() {
                     </span>
                 </div>
                 <div class="carga-block-actions">
-                    <button class="btn-add-ingreso-block" title="Agregar nuevo ingreso a esta carga">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        <span>Agregar Ingreso</span>
+                    <button class="btn-add-ingreso-block" title="Agregar nuevo ingreso a esta carga" style="padding: 0.5rem;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
 
-                    <button class="btn-email-carga" title="Enviar o copiar formatos por correo para toda esta carga">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                        <span>Enviar Formatos por Carga</span>
+                    <button class="btn-email-carga" title="Enviar o copiar formatos por correo para toda esta carga" style="padding: 0.5rem;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                     </button>
 
-                    <button class="btn-export-carga" title="Exportar esta carga a Excel (con credenciales IT)">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
-                        <span>Excel</span>
+                    <button class="btn-export-carga" title="Exportar esta carga a Excel" style="padding: 0.5rem;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
                     </button>
                     <svg class="carga-chevron" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
@@ -273,10 +270,10 @@ window.RH.initAltas = function() {
                 <td>${emp.nombre} ${emp.apellido_paterno} ${emp.apellido_materno || ''}</td>
                 <td>${emp.puesto}</td>
                 <td><span style="color:#2563eb; font-weight:600;">${emp.nombre_area || ''}</span></td>
+                <td>${emp.fecha_ingreso ? emp.fecha_ingreso.split(' ')[0] : ''}</td>
                 <td><span class="badge-status ${statusClass}">${statusText}</span></td>
                 <td><strong style="color: #059669; font-family: monospace;">${emp.correo_asignado || 'En espera'}</strong></td>
                 <td><span style="font-family: monospace;">${emp.password_asignado || 'QueretaroMex2026*'}</span></td>
-                <td>${emp.fecha_ingreso ? emp.fecha_ingreso.split(' ')[0] : ''}</td>
             `;
             window.RH.DOM.altasTbody.appendChild(tr);
         });

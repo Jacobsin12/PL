@@ -48,7 +48,6 @@ window.RH.initMultiple = function() {
         }
         return html;
     };
-
     window.RH.showInlineBulk = function(numRows) {
         if (typeof window.RH.updateDOM === 'function') window.RH.updateDOM();
 
@@ -57,7 +56,7 @@ window.RH.initMultiple = function() {
 
         if (!container || !tbody) return;
 
-        // Asegurar navegación activa hacia la vista de directorio
+        // Ensure navigation active
         const targetNav = document.querySelector('.nav-item[data-target="view-rh-directorio"]');
         if (targetNav && !targetNav.classList.contains('active')) {
             targetNav.click();
@@ -120,8 +119,6 @@ window.RH.initMultiple = function() {
 
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-    
-    
 
     if (window.RH.DOM.btnCancelarInline) {
         window.RH.DOM.btnCancelarInline.addEventListener('click', () => {
