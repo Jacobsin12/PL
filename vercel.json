@@ -1,0 +1,9 @@
+{
+  "outputDirectory": "front",
+  "rewrites": [
+    {
+      "source": "/back/:path*",
+      "destination": "https://maneu-backend.onrender.com/back/:path*"
+    }
+  ]
+}
