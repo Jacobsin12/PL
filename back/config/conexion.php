@@ -15,11 +15,34 @@ try {
         $conn = new PDO("mysql:host=$serverName$portStr;dbname=$database;charset=utf8mb4", $uid, $pwd);
     } elseif ($driver === 'pgsql') {
         $portStr = $port ? ";port=$port" : ";port=5432";
-        $dsn = "pgsql:host=$serverName$portStr;dbname=$database";
-        try {
-            $conn = new PDO($dsn, $uid, $pwd);
-        } catch (PDOException $ex) {
-            $conn = new PDO("$dsn;sslmode=require", $uid, $pwd);
+        $hostsToTry = [$serverName];
+        if (strpos($serverName, 'dpg-') === 0 && strpos($serverName, '.') === false) {
+            $hostsToTry[] = $serverName . '.oregon-postgres.render.com';
+            $hostsToTry[] = $serverName . '.frankfurt-postgres.render.com';
+            $hostsToTry[] = $serverName . '.ohio-postgres.render.com';
+            $hostsToTry[] = $serverName . '.singapore-postgres.render.com';
+        }
+
+        $lastException = null;
+        $connected = false;
+        foreach ($hostsToTry as $h) {
+            $dsn = "pgsql:host=$h$portStr;dbname=$database";
+            try {
+                $conn = new PDO($dsn, $uid, $pwd);
+                $connected = true;
+                break;
+            } catch (PDOException $ex1) {
+                try {
+                    $conn = new PDO("$dsn;sslmode=require", $uid, $pwd);
+                    $connected = true;
+                    break;
+                } catch (PDOException $ex2) {
+                    $lastException = $ex2;
+                }
+            }
+        }
+        if (!$connected && $lastException) {
+            throw $lastException;
         }
     } else {
         // Se establece la conexión utilizando PDO_SQLSRV (Local / Azure)
@@ -49,6 +72,7 @@ try {
     exit;
 }
 ?>
+
 
 
 
