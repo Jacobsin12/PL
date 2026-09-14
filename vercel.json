@@ -3,7 +3,8 @@
   "rewrites": [
     {
       "source": "/back/:path*",
-      "destination": "https://maneu-backend.onrender.com/back/:path*"
+      "destination": "https://pl-tchq.onrender.com/back/:path*"
     }
   ]
 }
+
