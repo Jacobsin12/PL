@@ -28,6 +28,19 @@ try {
     
     // Configurar PDO para que lance excepciones en caso de error
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Auto-crear tablas e insertar datos iniciales en PostgreSQL/MySQL si aún no existen
+    if ($driver === 'pgsql' || $driver === 'mysql') {
+        try {
+            $conn->query("SELECT 1 FROM usuarios_sistema LIMIT 1");
+        } catch (Exception $eTable) {
+            $sqlFile = __DIR__ . '/../db/script_creacion_' . ($driver === 'pgsql' ? 'pgsql' : 'mysql') . '.sql';
+            if (file_exists($sqlFile)) {
+                $conn->exec(file_get_contents($sqlFile));
+            }
+        }
+    }
+
 } catch(PDOException $e) {
     if (!headers_sent()) {
         header('Content-Type: application/json');
@@ -36,5 +49,6 @@ try {
     exit;
 }
 ?>
+
 
 
