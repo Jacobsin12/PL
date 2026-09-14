@@ -16,6 +16,11 @@ try {
     } elseif ($driver === 'pgsql') {
         $portStr = $port ? ";port=$port" : ";port=5432";
         
+        // Auto-corregir si falta la 'd' inicial en pg-
+        if (strpos($serverName, 'pg-') === 0) {
+            $serverName = 'd' . $serverName;
+        }
+
         $hostsToTry = [];
         if (strpos($serverName, 'dpg-') === 0) {
             if (strpos($serverName, '.') === false) {
@@ -23,6 +28,8 @@ try {
                 $hostsToTry[] = $serverName;
             } else {
                 $hostsToTry[] = $serverName;
+                $parts = explode('.', $serverName);
+                $hostsToTry[] = $parts[0];
             }
         } else {
             $hostsToTry[] = $serverName;
