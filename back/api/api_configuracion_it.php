@@ -60,7 +60,7 @@ try {
                     config_completada = :config_completada,
                     id_responsable_it = COALESCE(:id_responsable_it, id_responsable_it),
                     estatus = :estatus,
-                    fecha_completada = CASE WHEN :estatus_check = 'completada' AND fecha_completada IS NULL THEN GETDATE() ELSE fecha_completada END,
+                    fecha_completada = CASE WHEN :estatus_check = 'completada' AND fecha_completada IS NULL THEN CURRENT_TIMESTAMP ELSE fecha_completada END,
                     notas = :notas
                 WHERE id_config = :id_config OR id_ingreso = :id_ingreso";
 
