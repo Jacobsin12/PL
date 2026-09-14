@@ -14,55 +14,61 @@ try {
         $portStr = $port ? ";port=$port" : "";
         $conn = new PDO("mysql:host=$serverName$portStr;dbname=$database;charset=utf8mb4", $uid, $pwd);
     } elseif ($driver === 'pgsql') {
-        $portStr = $port ? ";port=$port" : ";port=5432";
-        
-        // Auto-corregir si falta la 'd' inicial en pg-
+        // Soporte para URL completa de Render DATABASE_URL o INTERNAL_DATABASE_URL
+        $envUrl = getenv('DATABASE_URL') ?: getenv('INTERNAL_DATABASE_URL') ?: getenv('EXTERNAL_DATABASE_URL');
+        if ($envUrl) {
+            $parsed = parse_url($envUrl);
+            if ($parsed && isset($parsed['host'])) {
+                $serverName = $parsed['host'];
+                if (isset($parsed['user'])) $uid = $parsed['user'];
+                if (isset($parsed['pass'])) $pwd = $parsed['pass'];
+                if (isset($parsed['path'])) $database = ltrim($parsed['path'], '/');
+                if (isset($parsed['port'])) $port = $parsed['port'];
+            }
+        }
+
         if (strpos($serverName, 'pg-') === 0) {
             $serverName = 'd' . $serverName;
         }
 
-        $hostsToTry = [];
-        if (strpos($serverName, 'dpg-') === 0) {
-            if (strpos($serverName, '.') === false) {
-                $hostsToTry[] = $serverName . '.oregon-postgres.render.com';
-                $hostsToTry[] = $serverName;
-            } else {
-                $hostsToTry[] = $serverName;
-                $parts = explode('.', $serverName);
-                $hostsToTry[] = $parts[0];
-            }
-        } else {
-            $hostsToTry[] = $serverName;
-        }
+        $baseId = (strpos($serverName, 'dpg-') === 0) ? explode('.', $serverName)[0] : $serverName;
+        $fqdn   = (strpos($serverName, 'dpg-') === 0 && strpos($serverName, '.') === false) 
+                  ? $serverName . '.oregon-postgres.render.com' 
+                  : $serverName;
+        $portVal = $port ?: '5432';
+        $caCert  = '/etc/ssl/certs/ca-certificates.crt';
 
-        $caCert = '/etc/ssl/certs/ca-certificates.crt';
-        $sslConfigs = [
-            "sslmode=require;sslrootcert=$caCert",
-            "sslmode=require",
-            "sslmode=verify-ca;sslrootcert=$caCert",
-            "sslmode=verify-full;sslrootcert=$caCert",
-            "sslmode=prefer",
-            "sslmode=disable"
+        $dsnCandidates = [
+            // Sintaxis LibPQ con espacios (Estándar recomendado de PostgreSQL en PHP/Docker)
+            "pgsql:host=$fqdn port=$portVal dbname=$database sslmode=require",
+            "pgsql:host=$fqdn port=$portVal dbname=$database sslmode=require sslrootcert=$caCert",
+            "pgsql:host=$fqdn port=$portVal dbname=$database sslmode=prefer",
+            "pgsql:host=$baseId port=$portVal dbname=$database sslmode=disable",
+            "pgsql:host=$baseId port=$portVal dbname=$database",
+
+            // Sintaxis clásica PDO con punto y coma
+            "pgsql:host=$fqdn;port=$portVal;dbname=$database;sslmode=require",
+            "pgsql:host=$fqdn;port=$portVal;dbname=$database;sslmode=require;sslrootcert=$caCert",
+            "pgsql:host=$fqdn;port=$portVal;dbname=$database;sslmode=prefer",
+            "pgsql:host=$baseId;port=$portVal;dbname=$database;sslmode=disable",
+            "pgsql:host=$baseId;port=$portVal;dbname=$database",
         ];
 
         $connected = false;
         $errors = [];
 
-        foreach ($hostsToTry as $h) {
-            foreach ($sslConfigs as $sslOpt) {
-                $dsn = "pgsql:host=$h$portStr;dbname=$database;$sslOpt";
-                try {
-                    $conn = new PDO($dsn, $uid, $pwd);
-                    $connected = true;
-                    break 2;
-                } catch (PDOException $ex) {
-                    $errors[] = "[$h | $sslOpt]: " . $ex->getMessage();
-                }
+        foreach ($dsnCandidates as $dsn) {
+            try {
+                $conn = new PDO($dsn, $uid, $pwd);
+                $connected = true;
+                break;
+            } catch (PDOException $ex) {
+                $errors[] = "[$dsn]: " . $ex->getMessage();
             }
         }
 
         if (!$connected) {
-            throw new PDOException(implode("\n", $errors));
+            throw new PDOException("Fallaron todos los intentos de conexión:\n" . implode("\n", array_slice($errors, 0, 4)));
         }
     } else {
         // Se establece la conexión utilizando PDO_SQLSRV (Local / Azure)
