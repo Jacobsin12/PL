@@ -1,84 +1,47 @@
 <?php
 date_default_timezone_set('America/Mexico_City');
 
-// Configuración flexible: lee de variables de entorno (Render/Cloud) o usa por defecto la configuración local (XAMPP/SQLServer)
-$driver     = getenv('DB_DRIVER') ?: 'sqlsrv';
-$serverName = getenv('DB_HOST')   ?: 'localhost\\SQLEXPRESS';
-$database   = getenv('DB_NAME')   ?: 'ManeU_DB';
-$uid        = getenv('DB_USER')   ?: 'sa';
-$pwd        = getenv('DB_PASS')   ?: '0512';
-$port       = getenv('DB_PORT')   ?: '';
+// 1. Si existe URL de base de datos (Render / Supabase / Railway), la usamos directamente
+$dbUrl = getenv('INTERNAL_DATABASE_URL') ?: getenv('DATABASE_URL') ?: getenv('EXTERNAL_DATABASE_URL');
 
-try {
+if ($dbUrl) {
+    $parsed   = parse_url($dbUrl);
+    $driver   = 'pgsql';
+    $host     = $parsed['host'] ?? 'localhost';
+    $database = ltrim($parsed['path'] ?? 'maneu_db', '/');
+    $uid      = $parsed['user'] ?? '';
+    $pwd      = $parsed['pass'] ?? '';
+    $port     = $parsed['port'] ?? 5432;
+    
+    // Si la URL tiene dominio .render.com requiere SSL, si es hostname interno (dpg-xxx) va sin SSL
+    $sslmode  = (strpos($host, '.') !== false) ? 'require' : 'disable';
+    $dsn      = "pgsql:host=$host;port=$port;dbname=$database;sslmode=$sslmode";
+} else {
+    // 2. Si no hay URL, lee variables individuales o cae en tu configuración local (XAMPP / SQL Server)
+    $driver   = getenv('DB_DRIVER') ?: 'sqlsrv';
+    $host     = getenv('DB_HOST')   ?: 'localhost\\SQLEXPRESS';
+    $database = getenv('DB_NAME')   ?: 'ManeU_DB';
+    $uid      = getenv('DB_USER')   ?: 'sa';
+    $pwd      = getenv('DB_PASS')   ?: '0512';
+    $port     = getenv('DB_PORT')   ?: '';
+
     if ($driver === 'mysql') {
         $portStr = $port ? ";port=$port" : "";
-        $conn = new PDO("mysql:host=$serverName$portStr;dbname=$database;charset=utf8mb4", $uid, $pwd);
+        $dsn = "mysql:host=$host$portStr;dbname=$database;charset=utf8mb4";
     } elseif ($driver === 'pgsql') {
-        // Soporte para URL completa de Render DATABASE_URL o INTERNAL_DATABASE_URL
-        $envUrl = getenv('DATABASE_URL') ?: getenv('INTERNAL_DATABASE_URL') ?: getenv('EXTERNAL_DATABASE_URL');
-        if ($envUrl) {
-            $parsed = parse_url($envUrl);
-            if ($parsed && isset($parsed['host'])) {
-                $serverName = $parsed['host'];
-                if (isset($parsed['user'])) $uid = $parsed['user'];
-                if (isset($parsed['pass'])) $pwd = $parsed['pass'];
-                if (isset($parsed['path'])) $database = ltrim($parsed['path'], '/');
-                if (isset($parsed['port'])) $port = $parsed['port'];
-            }
-        }
-
-        if (strpos($serverName, 'pg-') === 0) {
-            $serverName = 'd' . $serverName;
-        }
-
-        $baseId = (strpos($serverName, 'dpg-') === 0) ? explode('.', $serverName)[0] : $serverName;
-        $fqdn   = (strpos($serverName, 'dpg-') === 0 && strpos($serverName, '.') === false) 
-                  ? $serverName . '.oregon-postgres.render.com' 
-                  : $serverName;
-        $portVal = $port ?: '5432';
-        $caCert  = '/etc/ssl/certs/ca-certificates.crt';
-
-        $dsnCandidates = [
-            // Sintaxis LibPQ con espacios (Estándar recomendado de PostgreSQL en PHP/Docker)
-            "pgsql:host=$fqdn port=$portVal dbname=$database sslmode=require",
-            "pgsql:host=$fqdn port=$portVal dbname=$database sslmode=require sslrootcert=$caCert",
-            "pgsql:host=$fqdn port=$portVal dbname=$database sslmode=prefer",
-            "pgsql:host=$baseId port=$portVal dbname=$database sslmode=disable",
-            "pgsql:host=$baseId port=$portVal dbname=$database",
-
-            // Sintaxis clásica PDO con punto y coma
-            "pgsql:host=$fqdn;port=$portVal;dbname=$database;sslmode=require",
-            "pgsql:host=$fqdn;port=$portVal;dbname=$database;sslmode=require;sslrootcert=$caCert",
-            "pgsql:host=$fqdn;port=$portVal;dbname=$database;sslmode=prefer",
-            "pgsql:host=$baseId;port=$portVal;dbname=$database;sslmode=disable",
-            "pgsql:host=$baseId;port=$portVal;dbname=$database",
-        ];
-
-        $connected = false;
-        $errors = [];
-
-        foreach ($dsnCandidates as $dsn) {
-            try {
-                $conn = new PDO($dsn, $uid, $pwd);
-                $connected = true;
-                break;
-            } catch (PDOException $ex) {
-                $errors[] = "[$dsn]: " . $ex->getMessage();
-            }
-        }
-
-        if (!$connected) {
-            throw new PDOException("Fallaron todos los intentos de conexión:\n" . implode("\n", array_slice($errors, 0, 4)));
-        }
+        $portStr = $port ? ";port=$port" : ";port=5432";
+        $sslmode = (strpos($host, '.') !== false) ? 'require' : 'disable';
+        $dsn = "pgsql:host=$host$portStr;dbname=$database;sslmode=$sslmode";
     } else {
-        // Se establece la conexión utilizando PDO_SQLSRV (Local / Azure)
-        $conn = new PDO("sqlsrv:server=$serverName;Database=$database;TrustServerCertificate=true", $uid, $pwd);
+        $dsn = "sqlsrv:server=$host;Database=$database;TrustServerCertificate=true";
     }
-    
-    // Configurar PDO para que lance excepciones en caso de error
+}
+
+try {
+    $conn = new PDO($dsn, $uid, $pwd);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Auto-crear tablas e insertar datos iniciales en PostgreSQL/MySQL si aún no existen
+    // 3. Auto-crear las tablas e insertar usuarios por defecto si la base de datos está vacía
     if ($driver === 'pgsql' || $driver === 'mysql') {
         try {
             $conn->query("SELECT 1 FROM usuarios_sistema LIMIT 1");
@@ -89,17 +52,11 @@ try {
             }
         }
     }
-
 } catch(PDOException $e) {
     if (!headers_sent()) {
         header('Content-Type: application/json');
     }
-    echo json_encode(["status" => "error", "message" => "Error de conexión a BD: " . $e->getMessage()]);
+    echo json_encode(["status" => "error", "message" => "Error de conexion BD: " . $e->getMessage()]);
     exit;
 }
 ?>
-
-
-
-
-
