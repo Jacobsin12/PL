@@ -35,20 +35,28 @@ try {
             $hostsToTry[] = $serverName;
         }
 
-        $sslModes = ['require', 'disable', 'prefer'];
+        $caCert = '/etc/ssl/certs/ca-certificates.crt';
+        $sslConfigs = [
+            "sslmode=require;sslrootcert=$caCert",
+            "sslmode=require",
+            "sslmode=verify-ca;sslrootcert=$caCert",
+            "sslmode=verify-full;sslrootcert=$caCert",
+            "sslmode=prefer",
+            "sslmode=disable"
+        ];
 
         $connected = false;
         $errors = [];
 
         foreach ($hostsToTry as $h) {
-            foreach ($sslModes as $ssl) {
-                $dsn = "pgsql:host=$h$portStr;dbname=$database;sslmode=$ssl";
+            foreach ($sslConfigs as $sslOpt) {
+                $dsn = "pgsql:host=$h$portStr;dbname=$database;$sslOpt";
                 try {
                     $conn = new PDO($dsn, $uid, $pwd);
                     $connected = true;
                     break 2;
                 } catch (PDOException $ex) {
-                    $errors[] = "[$h | ssl=$ssl]: " . $ex->getMessage();
+                    $errors[] = "[$h | $sslOpt]: " . $ex->getMessage();
                 }
             }
         }
