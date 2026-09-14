@@ -15,32 +15,37 @@ try {
         $conn = new PDO("mysql:host=$serverName$portStr;dbname=$database;charset=utf8mb4", $uid, $pwd);
     } elseif ($driver === 'pgsql') {
         $portStr = $port ? ";port=$port" : ";port=5432";
-        $hostsToTry = [$serverName];
-        if (strpos($serverName, 'dpg-') === 0 && strpos($serverName, '.') === false) {
-            $hostsToTry[] = $serverName . '.oregon-postgres.render.com';
-            $hostsToTry[] = $serverName . '.frankfurt-postgres.render.com';
-            $hostsToTry[] = $serverName . '.ohio-postgres.render.com';
-            $hostsToTry[] = $serverName . '.singapore-postgres.render.com';
+        
+        $hostsToTry = [];
+        if (strpos($serverName, 'dpg-') === 0) {
+            if (strpos($serverName, '.') === false) {
+                $hostsToTry[] = $serverName . '.oregon-postgres.render.com';
+                $hostsToTry[] = $serverName;
+            } else {
+                $hostsToTry[] = $serverName;
+            }
+        } else {
+            $hostsToTry[] = $serverName;
         }
 
-        $lastException = null;
+        $sslModes = ['require', 'prefer', 'disable'];
+
         $connected = false;
+        $lastException = null;
+
         foreach ($hostsToTry as $h) {
-            $dsn = "pgsql:host=$h$portStr;dbname=$database";
-            try {
-                $conn = new PDO($dsn, $uid, $pwd);
-                $connected = true;
-                break;
-            } catch (PDOException $ex1) {
+            foreach ($sslModes as $ssl) {
+                $dsn = "pgsql:host=$h$portStr;dbname=$database;sslmode=$ssl";
                 try {
-                    $conn = new PDO("$dsn;sslmode=require", $uid, $pwd);
+                    $conn = new PDO($dsn, $uid, $pwd);
                     $connected = true;
-                    break;
-                } catch (PDOException $ex2) {
-                    $lastException = $ex2;
+                    break 2;
+                } catch (PDOException $ex) {
+                    $lastException = $ex;
                 }
             }
         }
+
         if (!$connected && $lastException) {
             throw $lastException;
         }
@@ -72,6 +77,7 @@ try {
     exit;
 }
 ?>
+
 
 
 
