@@ -28,10 +28,10 @@ try {
             $hostsToTry[] = $serverName;
         }
 
-        $sslModes = ['require', 'prefer', 'disable'];
+        $sslModes = ['require', 'disable', 'prefer'];
 
         $connected = false;
-        $lastException = null;
+        $errors = [];
 
         foreach ($hostsToTry as $h) {
             foreach ($sslModes as $ssl) {
@@ -41,13 +41,13 @@ try {
                     $connected = true;
                     break 2;
                 } catch (PDOException $ex) {
-                    $lastException = $ex;
+                    $errors[] = "[$h | ssl=$ssl]: " . $ex->getMessage();
                 }
             }
         }
 
-        if (!$connected && $lastException) {
-            throw $lastException;
+        if (!$connected) {
+            throw new PDOException(implode("\n", $errors));
         }
     } else {
         // Se establece la conexión utilizando PDO_SQLSRV (Local / Azure)
