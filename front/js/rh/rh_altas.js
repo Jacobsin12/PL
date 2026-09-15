@@ -109,6 +109,7 @@ window.RH.initAltas = function() {
             block.className = 'carga-block collapsed';
             block.style.animationDelay = `${idx * 100}ms`;
 
+            const incompleteCount = emps.filter(e => !e.mug || e.mug.trim() === '' || e.mug.trim() === '-').length;
             const completedITCount = emps.filter(e => e.estatus_it === 'completada').length;
             const isFullyCompleted = completedITCount === emps.length && emps.length > 0;
             const isPartial = completedITCount > 0 && !isFullyCompleted;
@@ -117,7 +118,11 @@ window.RH.initAltas = function() {
             let badgeIcon = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>';
             let badgeText = `Pendiente IT (${completedITCount}/${emps.length})`;
 
-            if (isFullyCompleted) {
+            if (incompleteCount > 0) {
+                badgeStyle = "background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5;";
+                badgeIcon = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                badgeText = `Incompleto (Falta MUG en ${incompleteCount})`;
+            } else if (isFullyCompleted) {
                 badgeStyle = "background: #dcfce7; color: #166534; border: 1px solid #86efac;";
                 badgeIcon = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>';
                 badgeText = `IT Completado (${completedITCount}/${emps.length})`;
@@ -196,30 +201,39 @@ window.RH.initAltas = function() {
                                 <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Nómina</th>
                                 <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Nombre Completo</th>
                                 <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Puesto / Área</th>
-                                <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Estatus IT</th>
+                                <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Estatus Datos / IT</th>
                                 <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Correo Asignado (IT)</th>
                                 <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Contraseña (IT)</th>
                                 <th style="padding: 0.6rem 1rem; font-size:0.8rem;">Fecha Ingreso</th>
+                                <th style="padding: 0.6rem 1rem; font-size:0.8rem; text-align:center;">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
             emps.forEach(emp => {
-                const statusClass = emp.estatus_it === 'completada' ? 'completada' : 'pendiente';
-                const statusText = emp.estatus_it === 'completada' ? 'Completado' : 'Pendiente';
+                const isMugMissing = !emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-';
+                let statusBadgeHTML = '';
+                if (isMugMissing) {
+                    statusBadgeHTML = `<span class="badge-status-custom" style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;" title="Falta asignar MUG por RH"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Faltan datos (Sin MUG)</span>`;
+                } else if (emp.estatus_it === 'completada') {
+                    statusBadgeHTML = `<span class="badge-status completada">Completado IT</span>`;
+                } else {
+                    statusBadgeHTML = `<span class="badge-status pendiente">Pendiente IT</span>`;
+                }
+
                 const mugHTML = emp.mug ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
                     <span>${emp.mug}</span>
                     <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </span>` : '-';
+                </span>` : '<span style="color:#c2410c; font-weight:600; font-size:0.8rem;">Sin MUG</span>';
 
                 tableHTML += `
                     <tr>
                         <td style="padding: 0.6rem 1rem;">${mugHTML}</td>
-                        <td style="padding: 0.6rem 1rem;">${emp.numero_nomina}</td>
+                        <td style="padding: 0.6rem 1rem;">${emp.numero_nomina || '-'}</td>
                         <td style="padding: 0.6rem 1rem;"><strong>${emp.nombre} ${emp.apellido_paterno} ${emp.apellido_materno || ''}</strong></td>
                         <td style="padding: 0.6rem 1rem;">${emp.puesto}<br><span style="font-size:0.75rem; color:#2563eb;">${emp.nombre_area || ''}</span></td>
                         <td style="padding: 0.6rem 1rem;">
-                            <span class="badge-status ${statusClass}">${statusText}</span>
+                            ${statusBadgeHTML}
                         </td>
                         <td style="padding: 0.6rem 1rem;">
                             <strong style="color: #059669; font-family: monospace; font-size: 0.85rem;">
@@ -232,11 +246,27 @@ window.RH.initAltas = function() {
                             </span>
                         </td>
                         <td style="padding: 0.6rem 1rem;">${emp.fecha_ingreso ? emp.fecha_ingreso.split(' ')[0] : ''}</td>
+                        <td style="padding: 0.6rem 1rem; text-align:center;">
+                            <button class="btn-edit btn-edit-emp-alta" data-id="${emp.id_ingreso}" title="Editar o completar datos de esta alta" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span>Editar</span>
+                            </button>
+                        </td>
                     </tr>
                 `;
             });
             tableHTML += '</tbody></table></div>';
             body.innerHTML = tableHTML;
+
+            body.querySelectorAll('.btn-edit-emp-alta').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const empId = btn.dataset.id;
+                    if (empId && window.RH && typeof window.RH.editEmpleado === 'function') {
+                        window.RH.editEmpleado(empId);
+                    }
+                });
+            });
 
             block.appendChild(header);
             block.appendChild(body);
@@ -256,25 +286,46 @@ window.RH.initAltas = function() {
             return db - da;
         });
         sorted.forEach(emp => {
-            const statusClass = emp.estatus_it === 'completada' ? 'completada' : 'pendiente';
-            const statusText = emp.estatus_it === 'completada' ? 'Completado' : 'Pendiente';
+            const isMugMissing = !emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-';
+            let statusBadgeHTML = '';
+            if (isMugMissing) {
+                statusBadgeHTML = `<span class="badge-status-custom" style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Faltan datos (Sin MUG)</span>`;
+            } else if (emp.estatus_it === 'completada') {
+                statusBadgeHTML = `<span class="badge-status completada">Completado IT</span>`;
+            } else {
+                statusBadgeHTML = `<span class="badge-status pendiente">Pendiente IT</span>`;
+            }
+
             const mugHTML = emp.mug ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
                 <span>${emp.mug}</span>
                 <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </span>` : '-';
+            </span>` : '<span style="color:#c2410c; font-weight:600; font-size:0.8rem;">Sin MUG</span>';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${mugHTML}</td>
-                <td>${emp.numero_nomina}</td>
+                <td>${emp.numero_nomina || '-'}</td>
                 <td>${emp.nombre} ${emp.apellido_paterno} ${emp.apellido_materno || ''}</td>
                 <td>${emp.puesto}</td>
                 <td><span style="color:#2563eb; font-weight:600;">${emp.nombre_area || ''}</span></td>
                 <td>${emp.fecha_ingreso ? emp.fecha_ingreso.split(' ')[0] : ''}</td>
-                <td><span class="badge-status ${statusClass}">${statusText}</span></td>
+                <td>${statusBadgeHTML}</td>
                 <td><strong style="color: #059669; font-family: monospace;">${emp.correo_asignado || 'En espera'}</strong></td>
                 <td><span style="font-family: monospace;">${emp.password_asignado || 'QueretaroMex2026*'}</span></td>
+                <td style="text-align:center;">
+                    <button class="btn-edit btn-edit-emp-alta-gen" data-id="${emp.id_ingreso}" title="Editar o completar datos" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>Editar</span>
+                    </button>
+                </td>
             `;
+
+            tr.querySelector('.btn-edit-emp-alta-gen').addEventListener('click', () => {
+                if (window.RH && typeof window.RH.editEmpleado === 'function') {
+                    window.RH.editEmpleado(emp.id_ingreso);
+                }
+            });
+
             window.RH.DOM.altasTbody.appendChild(tr);
         });
     };
