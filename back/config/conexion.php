@@ -41,15 +41,21 @@ try {
     $conn = new PDO($dsn, $uid, $pwd);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // 3. Auto-sincronizar el esquema de tablas si falta alguna columna o tabla
+    // 3. Auto-sincronizar el esquema de tablas solo si las tablas no han sido creadas aún
     if ($driver === 'pgsql' || $driver === 'mysql') {
         try {
-            $sqlFile = __DIR__ . '/../db/script_creacion_' . ($driver === 'pgsql' ? 'pgsql' : 'mysql') . '.sql';
-            if (file_exists($sqlFile)) {
-                $conn->exec(file_get_contents($sqlFile));
+            // Verificar existencia rápida de la tabla principal
+            $conn->query("SELECT 1 FROM configuracion_it LIMIT 1");
+        } catch (Exception $eCheck) {
+            // Si la tabla no existe, ejecutar script de creación por primera vez
+            try {
+                $sqlFile = __DIR__ . '/../db/script_creacion_' . ($driver === 'pgsql' ? 'pgsql' : 'mysql') . '.sql';
+                if (file_exists($sqlFile)) {
+                    $conn->exec(file_get_contents($sqlFile));
+                }
+            } catch (Exception $eTable) {
+                // Continuar normalmente
             }
-        } catch (Exception $eTable) {
-            // Continuar normalmente
         }
     }
 } catch(PDOException $e) {

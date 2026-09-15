@@ -97,11 +97,13 @@ function setupClearFilters() {
 }
 
 async function loadDashboardData() {
+    if (window.isFetchingDashboardData) return;
+    window.isFetchingDashboardData = true;
     try {
         const res = await fetch('../back/api/api_empleados.php');
         const json = await res.json();
         
-        if(json.status === 'success') {
+        if(json.status === 'success' && Array.isArray(json.data)) {
             window.currentTableData = json.data.map(item => ({
                 mug: item.mug,
                 numero_nomina: item.numero_nomina,
@@ -114,12 +116,20 @@ async function loadDashboardData() {
                 fechaIngreso: item.fecha_ingreso
             }));
             updateDashboard();
-            if (typeof window.renderReport === 'function') {
-                window.renderReport();
+            if (typeof window.renderReport === 'function' && !window.isRenderingReport) {
+                window.isRenderingReport = true;
+                try {
+                    await window.renderReport();
+                } finally {
+                    window.isRenderingReport = false;
+                }
             }
         }
     } catch(e) {
         console.error("Error cargando datos del dashboard", e);
+        if (!window.currentTableData) window.currentTableData = [];
+    } finally {
+        window.isFetchingDashboardData = false;
     }
 }
 

@@ -125,16 +125,19 @@ function initNotifications() {
 }
 
 async function checkNotificationsCount() {
+    if (typeof window.updateNotifBadges === 'function') {
+        return window.updateNotifBadges();
+    }
     try {
         const res = await fetch('../back/api/api_notificaciones.php?count=true');
         const data = await res.json();
-        const badge = document.getElementById('notif-badge-count');
+        const badge = document.getElementById('notif-badge-count') || document.getElementById('badge-nav-notificaciones');
         
         if (data.status === 'success' && badge) {
             const count = data.unread_count || 0;
             if (count > 0) {
                 badge.innerText = count > 99 ? '99+' : count;
-                badge.style.display = 'flex';
+                badge.style.display = 'inline-flex';
             } else {
                 badge.innerText = '';
                 badge.style.setProperty('display', 'none', 'important');

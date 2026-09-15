@@ -16,6 +16,8 @@ try {
     if ($method === 'GET') {
         $onlyCount = isset($_GET['count']) && $_GET['count'] === 'true';
 
+        $dbDriver = $conn->getAttribute(PDO::ATTR_DRIVER_NAME);
+
         if ($onlyCount) {
             $sql = "SELECT COUNT(*) as total FROM notificaciones 
                     WHERE leida = 0 
@@ -25,10 +27,17 @@ try {
             $res = $stmt->fetch(PDO::FETCH_ASSOC);
             
             // Get latest unread notification for push purposes
-            $sqlLatest = "SELECT TOP 1 id_notificacion, titulo, mensaje FROM notificaciones 
-                          WHERE leida = 0 
-                          AND (id_usuario_destino = :userId2 OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId2))
-                          ORDER BY id_notificacion DESC";
+            if ($dbDriver === 'sqlsrv') {
+                $sqlLatest = "SELECT TOP 1 id_notificacion, titulo, mensaje FROM notificaciones 
+                              WHERE leida = 0 
+                              AND (id_usuario_destino = :userId2 OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId2))
+                              ORDER BY id_notificacion DESC";
+            } else {
+                $sqlLatest = "SELECT id_notificacion, titulo, mensaje FROM notificaciones 
+                              WHERE leida = 0 
+                              AND (id_usuario_destino = :userId2 OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId2))
+                              ORDER BY id_notificacion DESC LIMIT 1";
+            }
             $stmtLatest = $conn->prepare($sqlLatest);
             $stmtLatest->execute([':userId2' => $userId, ':rolId2' => $rolId]);
             $latest = $stmtLatest->fetch(PDO::FETCH_ASSOC);
@@ -39,9 +48,15 @@ try {
                 'latest_unread' => $latest ? $latest : null
             ]);
         } else {
-            $sql = "SELECT TOP 30 * FROM notificaciones 
-                    WHERE (id_usuario_destino = :userId OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId))
-                    ORDER BY leida ASC, fecha_creacion DESC";
+            if ($dbDriver === 'sqlsrv') {
+                $sql = "SELECT TOP 30 * FROM notificaciones 
+                        WHERE (id_usuario_destino = :userId OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId))
+                        ORDER BY leida ASC, fecha_creacion DESC";
+            } else {
+                $sql = "SELECT * FROM notificaciones 
+                        WHERE (id_usuario_destino = :userId OR (id_usuario_destino IS NULL AND id_rol_destino = :rolId))
+                        ORDER BY leida ASC, fecha_creacion DESC LIMIT 30";
+            }
             $stmt = $conn->prepare($sql);
             $stmt->execute([':userId' => $userId, ':rolId' => $rolId]);
             $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);

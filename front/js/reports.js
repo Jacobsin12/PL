@@ -28,10 +28,15 @@ window.renderReport = async () => {
     if(pdfDate) pdfDate.textContent = `Fecha: ${new Date().toLocaleDateString('es-MX')}`;
     if(pdfTitle) pdfTitle.textContent = `Reporte Ejecutivo Service Desk`;
     
-    // Asegurar que existan los datos
-    if (!window.currentTableData || window.currentTableData.length === 0) {
-        if (typeof window.loadDashboardData === 'function') {
-            await window.loadDashboardData();
+    // Cargar datos solo si no han sido inicializados aún (evita bucle infinito cuando el arreglo está vacío)
+    if (window.currentTableData === undefined || window.currentTableData === null) {
+        if (typeof window.loadDashboardData === 'function' && !window.isFetchingDashboardData) {
+            window.isFetchingDashboardData = true;
+            try {
+                await window.loadDashboardData();
+            } finally {
+                window.isFetchingDashboardData = false;
+            }
         }
     }
 
