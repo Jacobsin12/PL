@@ -361,10 +361,42 @@ window.RH.switchFormatTab = function(formatType) {
 // ============================================
 // LANZAR OUTLOOK (mailto:)
 // ============================================
-window.RH.openOutlookFormat = function(formatType) {
+window.RH.openOutlookFormat = async function(formatType) {
     const currentTab = formatType || window.RH.activeFormatTab || 'it';
     const targetEmpData = window.RH.currentBatchEmps || window.RH.currentFormatEmp;
     if (!targetEmpData) return;
+
+    const incompleteCount = window.RH.checkFormatIncomplete(currentTab, targetEmpData);
+    if (incompleteCount > 0) {
+        const areaNames = {
+            it: 'IT (Servicios de TI)',
+            epp: 'EPP, HSE, Almacén y RH',
+            badge: 'Badge (Seguridad Patrimonial)',
+            transporte: 'Transporte',
+            medico: 'Servicio Médico'
+        };
+        const areaLabel = areaNames[currentTab] || currentTab.toUpperCase();
+
+        if (window.Swal) {
+            const result = await Swal.fire({
+                title: '⚠️ ¡Aún Faltan Datos por Registrar!',
+                html: `Se detectaron <strong>${incompleteCount} registro(s)</strong> con datos incompletos requeridos para el formato de <strong>${areaLabel}</strong>.<br><br>En la solicitud y reporte de Excel se incluirá la leyenda <span style="color:#dc2626; font-weight:bold;">"AÚN FALTAN DATOS POR REGISTRAR"</span>.<br><br>¿Deseas continuar y abrir el correo en Outlook de todos modos?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '📧 Sí, abrir Outlook',
+                cancelButtonText: '✏️ Cancelar y completar datos',
+                confirmButtonColor: '#0078d4',
+                cancelButtonColor: '#6e7881',
+                customClass: {
+                    popup: 'safran-swal-popup'
+                }
+            });
+            if (!result.isConfirmed) return;
+        } else {
+            const ok = confirm(`Atención: Existen ${incompleteCount} registro(s) con datos incompletos para el área de ${areaLabel}. ¿Deseas abrir Outlook de todos modos?`);
+            if (!ok) return;
+        }
+    }
 
     const toInput = document.getElementById('format-to-input');
     const ccInput = document.getElementById('format-cc-input');
