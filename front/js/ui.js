@@ -455,10 +455,26 @@ window.exportStyledExcel = async function({ title, filename, columns, data }) {
                         right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
                     };
 
+                    const valStr = String(val);
                     const colNameLower = (col.header || '').toLowerCase();
-                    if (colNameLower.includes('estatus')) {
+
+                    if (valStr.includes('FALTAN DATOS POR REGISTRAR')) {
                         cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                        const isComp = String(val).includes('Completado');
+                        cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF991B1B' } };
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFFEE2E2' }
+                        };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: 'FCAF5555' } },
+                            left: { style: 'thin', color: { argb: 'FCAF5555' } },
+                            bottom: { style: 'thin', color: { argb: 'FCAF5555' } },
+                            right: { style: 'thin', color: { argb: 'FCAF5555' } }
+                        };
+                    } else if (colNameLower.includes('estatus')) {
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        const isComp = valStr.includes('Completado');
                         cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: isComp ? 'FF15803D' : 'FFB45309' } };
                         cell.fill = {
                             type: 'pattern',

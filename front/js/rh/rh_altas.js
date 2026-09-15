@@ -119,8 +119,8 @@ window.RH.initAltas = function() {
             let badgeText = `Pendiente IT (${completedITCount}/${emps.length})`;
 
             if (incompleteCount > 0) {
-                badgeStyle = "background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5;";
-                badgeIcon = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                badgeStyle = "background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;";
+                badgeIcon = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>';
                 badgeText = `Incompleto (Falta MUG en ${incompleteCount})`;
             } else if (isFullyCompleted) {
                 badgeStyle = "background: #dcfce7; color: #166534; border: 1px solid #86efac;";
@@ -214,7 +214,7 @@ window.RH.initAltas = function() {
                 const isMugMissing = !emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-';
                 let statusBadgeHTML = '';
                 if (isMugMissing) {
-                    statusBadgeHTML = `<span class="badge-status-custom" style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;" title="Falta asignar MUG por RH"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Faltan datos (Sin MUG)</span>`;
+                    statusBadgeHTML = `<span class="badge-status-custom" style="background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;" title="Falta asignar MUG por RH"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Faltan datos (Sin MUG)</span>`;
                 } else if (emp.estatus_it === 'completada') {
                     statusBadgeHTML = `<span class="badge-status completada">Completado IT</span>`;
                 } else {
@@ -224,7 +224,7 @@ window.RH.initAltas = function() {
                 const mugHTML = emp.mug ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
                     <span>${emp.mug}</span>
                     <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </span>` : '<span style="color:#c2410c; font-weight:600; font-size:0.8rem;">Sin MUG</span>';
+                </span>` : '<span style="color:#dc2626; font-weight:700; font-size:0.8rem;">Sin MUG</span>';
 
                 tableHTML += `
                     <tr>
@@ -289,7 +289,7 @@ window.RH.initAltas = function() {
             const isMugMissing = !emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-';
             let statusBadgeHTML = '';
             if (isMugMissing) {
-                statusBadgeHTML = `<span class="badge-status-custom" style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Faltan datos (Sin MUG)</span>`;
+                statusBadgeHTML = `<span class="badge-status-custom" style="background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Faltan datos (Sin MUG)</span>`;
             } else if (emp.estatus_it === 'completada') {
                 statusBadgeHTML = `<span class="badge-status completada">Completado IT</span>`;
             } else {

@@ -318,16 +318,22 @@ window.RH.switchFormatTab = function(formatType) {
         }
     }
     if (incompleteCount > 0 && statusNoticeEl) {
-        statusNoticeEl.style.display = 'block';
+        statusNoticeEl.style.display = 'flex';
+        statusNoticeEl.style.alignItems = 'center';
+        statusNoticeEl.style.gap = '0.5rem';
         statusNoticeEl.style.margin = '0.5rem 0 1rem';
-        statusNoticeEl.style.padding = '0.6rem 1rem';
-        statusNoticeEl.style.background = '#fff7ed';
-        statusNoticeEl.style.border = '1px solid #ffedd5';
+        statusNoticeEl.style.padding = '0.75rem 1rem';
+        statusNoticeEl.style.background = '#fef2f2';
+        statusNoticeEl.style.border = '1.5px solid #fca5a5';
         statusNoticeEl.style.borderRadius = '8px';
-        statusNoticeEl.style.color = '#c2410c';
-        statusNoticeEl.style.fontSize = '0.85rem';
-        statusNoticeEl.style.fontWeight = '600';
-        statusNoticeEl.innerHTML = `⚠️ Atención: ${incompleteCount} registro(s) contienen datos pendientes. En el reporte de Excel y correo se indicará "AÚN FALTAN DATOS POR REGISTRAR" en los campos correspondientes.`;
+        statusNoticeEl.style.color = '#991b1b';
+        statusNoticeEl.style.fontSize = '0.88rem';
+        statusNoticeEl.style.fontWeight = '700';
+        statusNoticeEl.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.15)';
+        statusNoticeEl.innerHTML = `
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#dc2626" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>🚨 ALERTA DE DATOS PENDIENTES: ${incompleteCount} registro(s) contienen información requerida sin llenar. En el reporte de Excel se marcarán en ROJO con "AÚN FALTAN DATOS POR REGISTRAR".</span>
+        `;
     } else if (statusNoticeEl) {
         statusNoticeEl.style.display = 'none';
     }

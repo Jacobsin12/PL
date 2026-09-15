@@ -114,13 +114,13 @@ window.RH.highlightFilledInputs = function(container) {
         if (el.type === 'hidden' || el.type === 'button' || el.type === 'submit') return;
         const val = (el.value || '').trim();
         if (val !== '') {
-            el.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'; // Verde suave iluminado
+            el.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'; // Verde suave (Completado)
             el.style.border = '1px solid #10b981';
             el.style.boxShadow = '0 0 4px rgba(16, 185, 129, 0.25)';
         } else {
-            el.style.backgroundColor = '';
-            el.style.border = '';
-            el.style.boxShadow = '';
+            el.style.backgroundColor = 'rgba(239, 68, 68, 0.05)'; // Rojo suave (Faltan datos por registrar)
+            el.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+            el.style.boxShadow = '0 0 4px rgba(239, 68, 68, 0.15)';
         }
     });
 };
@@ -145,16 +145,16 @@ document.addEventListener('input', function(e) {
             }
         }
 
-        // Lógica de Color (Feedback Visual)
+        // Lógica de Color (Feedback Visual: Verde = Completado, Rojo = Pendiente)
         if (target.closest('.excel-grid, #form-empleado, #modal-empleado')) {
             if (target.value.trim() !== '') {
-                target.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'; // Verde suave iluminado
+                target.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'; // Verde suave
                 target.style.border = '1px solid #10b981';
                 target.style.boxShadow = '0 0 4px rgba(16, 185, 129, 0.25)';
             } else {
-                target.style.backgroundColor = ''; // Restablecer
-                target.style.border = ''; // Restablecer
-                target.style.boxShadow = ''; // Restablecer
+                target.style.backgroundColor = 'rgba(239, 68, 68, 0.05)'; // Rojo suave
+                target.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                target.style.boxShadow = '0 0 4px rgba(239, 68, 68, 0.15)';
             }
 
             // Verificar si la fila completa está lista en tablas múltiples
