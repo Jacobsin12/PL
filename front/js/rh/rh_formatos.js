@@ -345,25 +345,35 @@ window.RH.switchFormatTab = function(formatType) {
             cardTitle.parentElement.insertBefore(statusNoticeEl, cardTitle.nextSibling);
         }
     }
-    if (incompleteCount > 0 && statusNoticeEl) {
+    if (statusNoticeEl) {
         statusNoticeEl.style.display = 'flex';
         statusNoticeEl.style.alignItems = 'center';
         statusNoticeEl.style.gap = '0.5rem';
-        statusNoticeEl.style.margin = '0.5rem 0 1rem';
-        statusNoticeEl.style.padding = '0.75rem 1rem';
-        statusNoticeEl.style.background = '#fef2f2';
-        statusNoticeEl.style.border = '1.5px solid #fca5a5';
+        statusNoticeEl.style.margin = '0.5rem 0 0.5rem';
+        statusNoticeEl.style.padding = '0.65rem 1rem';
         statusNoticeEl.style.borderRadius = '8px';
-        statusNoticeEl.style.color = '#991b1b';
         statusNoticeEl.style.fontSize = '0.88rem';
         statusNoticeEl.style.fontWeight = '700';
-        statusNoticeEl.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.15)';
-        statusNoticeEl.innerHTML = `
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#dc2626" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            <span>🚨 ALERTA DE DATOS PENDIENTES: ${incompleteCount} registro(s) contienen información requerida sin llenar. En el reporte de Excel se marcarán en ROJO con "AÚN FALTAN DATOS POR REGISTRAR".</span>
-        `;
-    } else if (statusNoticeEl) {
-        statusNoticeEl.style.display = 'none';
+
+        if (incompleteCount > 0) {
+            statusNoticeEl.style.background = '#fef2f2';
+            statusNoticeEl.style.border = '1.5px solid #fca5a5';
+            statusNoticeEl.style.color = '#991b1b';
+            statusNoticeEl.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.15)';
+            statusNoticeEl.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#dc2626" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <span>🚨 ALERTA DE DATOS PENDIENTES: ${incompleteCount} registro(s) contienen información requerida sin llenar para este formato. En el reporte de Excel se marcarán en ROJO con "AÚN FALTAN DATOS POR REGISTRAR".</span>
+            `;
+        } else {
+            statusNoticeEl.style.background = '#dcfce7';
+            statusNoticeEl.style.border = '1.5px solid #86efac';
+            statusNoticeEl.style.color = '#166534';
+            statusNoticeEl.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.15)';
+            statusNoticeEl.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#16a34a" stroke-width="2.5" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <span>✅ ¡INFORMACIÓN COMPLETA! Todos los datos requeridos para el formato de esta área se encuentran registrados correctamente.</span>
+            `;
+        }
     }
 
     // Cargar destinatarios y copia guardados
