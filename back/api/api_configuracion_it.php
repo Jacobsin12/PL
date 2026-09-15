@@ -19,10 +19,11 @@ try {
                 LEFT JOIN planta p ON i.id_planta = p.id_planta
                 LEFT JOIN area a ON i.id_area = a.id_area
                 LEFT JOIN tipo_ingreso t ON i.id_tipo = t.id_tipo
-                LEFT JOIN usuarios_sistema u ON c.id_responsable_it = u.id_usuario";
+                LEFT JOIN usuarios_sistema u ON c.id_responsable_it = u.id_usuario
+                WHERE i.mug IS NOT NULL AND TRIM(i.mug) != '' AND TRIM(i.mug) != '-'";
         
         if ($estatus) {
-            $sql .= " WHERE c.estatus = :estatus";
+            $sql .= " AND c.estatus = :estatus";
         }
         
         $sql .= " ORDER BY i.fecha_registro DESC";

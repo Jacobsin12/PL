@@ -88,24 +88,30 @@ try {
                      
             $stmt = $conn->prepare($sql);
             $insertedIds = [];
+            $countWithMug = 0;
 
             foreach ($items as $item) {
-                if (!isset($item['mug']) || !isset($item['numero_nomina']) || !isset($item['nombre'])) {
-                    throw new Exception('Faltan campos obligatorios en al menos un registro.');
+                if (empty($item['nombre'])) {
+                    throw new Exception('Falta el nombre de colaborador en al menos un registro.');
                 }
                 
+                $mugVal = isset($item['mug']) ? trim($item['mug']) : '';
+                if ($mugVal !== '' && $mugVal !== '-') {
+                    $countWithMug++;
+                }
+
                 $stmt->execute([
-                    ':mug' => $item['mug'],
-                    ':numero_nomina' => $item['numero_nomina'],
+                    ':mug' => $mugVal,
+                    ':numero_nomina' => isset($item['numero_nomina']) ? trim($item['numero_nomina']) : '',
                     ':nombre' => $item['nombre'],
-                    ':apellido_paterno' => $item['apellido_paterno'],
-                    ':apellido_materno' => $item['apellido_materno'],
-                    ':puesto' => $item['puesto'],
-                    ':jefe_directo' => $item['jefe_directo'],
-                    ':id_planta' => $item['id_planta'],
-                    ':id_area' => $item['id_area'],
-                    ':id_tipo' => $item['id_tipo'],
-                    ':fecha_ingreso' => $item['fecha_ingreso'],
+                    ':apellido_paterno' => $item['apellido_paterno'] ?? '',
+                    ':apellido_materno' => $item['apellido_materno'] ?? '',
+                    ':puesto' => $item['puesto'] ?? '',
+                    ':jefe_directo' => $item['jefe_directo'] ?? '',
+                    ':id_planta' => !empty($item['id_planta']) ? $item['id_planta'] : null,
+                    ':id_area' => !empty($item['id_area']) ? $item['id_area'] : null,
+                    ':id_tipo' => !empty($item['id_tipo']) ? $item['id_tipo'] : null,
+                    ':fecha_ingreso' => !empty($item['fecha_ingreso']) ? $item['fecha_ingreso'] : date('Y-m-d'),
                     ':fecha_registro' => isset($item['fecha_registro']) && !empty($item['fecha_registro']) ? $item['fecha_registro'] : date('Y-m-d H:i:s'),
                     ':imss' => $item['imss'] ?? null,
                     ':curp' => $item['curp'] ?? null,
@@ -137,13 +143,13 @@ try {
                 $stmtConfig->execute([':id_ingreso' => $idIngreso]);
             }
 
-            // Notificar al departamento de IT (rol_id = 3)
+            // Notificar al departamento de IT (rol_id = 3) solo si TODOS los registros de la carga cuentan con MUG
             $countNew = count($insertedIds);
-            if ($countNew > 0) {
-                $titulo = $countNew === 1 ? 'Nueva Alta Registrada' : 'Nueva Carga Masiva Registrada';
+            if ($countNew > 0 && $countWithMug === $countNew) {
+                $titulo = $countNew === 1 ? 'Nueva Alta Registrada con MUG' : 'Nueva Carga Masiva Registrada con MUG';
                 $mensaje = $countNew === 1 
-                    ? 'RH ha registrado 1 nueva alta pendiente por configurar.' 
-                    : "RH ha registrado {$countNew} nuevas altas pendientes por configurar.";
+                    ? 'RH ha registrado 1 nueva alta con MUG lista para configurar.' 
+                    : "RH ha completado {$countNew} nuevas altas con MUG listas para configurar.";
                 
                 $stmtNotif = $conn->prepare("INSERT INTO notificaciones (id_rol_destino, tipo, titulo, mensaje, url_referencia) VALUES (3, 'nueva_alta', :titulo, :mensaje, 'it_dashboard.html')");
                 $stmtNotif->execute([

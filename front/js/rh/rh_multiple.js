@@ -78,8 +78,8 @@ window.RH.initMultiple = function() {
             tr.style.animationDelay = `${i * 60}ms`;
             tr.innerHTML = `
                 <td class="row-number">${i + 1}</td>
-                <td><input type="text" name="mug[]" required placeholder="MUG"></td>
-                <td><input type="text" name="numero_nomina[]" required placeholder="Nómina"></td>
+                <td><input type="text" name="mug[]" placeholder="MUG (Opcional)"></td>
+                <td><input type="text" name="numero_nomina[]" placeholder="Nómina (Opcional)"></td>
                 <td><input type="text" name="nombre[]" required placeholder="Nombre"></td>
                 <td><input type="text" name="apellido_paterno[]" required placeholder="Ap. Paterno"></td>
                 <td><input type="text" name="apellido_materno[]" required placeholder="Ap. Materno"></td>
