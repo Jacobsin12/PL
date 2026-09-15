@@ -48,6 +48,32 @@ window.RH.saveCurrentEmailConfig = function() {
 // ============================================
 // APERTURA DE MODAL (INDIVIDUAL Y POR BATCH/CARGA)
 // ============================================
+window.RH.triggerIncompleteDataAlert = function(targetData) {
+    const currentTab = window.RH.activeFormatTab || 'it';
+    const incompleteCount = window.RH.checkFormatIncomplete(currentTab, targetData);
+    if (incompleteCount > 0 && window.Swal) {
+        const areaNames = {
+            it: 'IT (Servicios de TI)',
+            epp: 'EPP, HSE, Almacén y RH',
+            badge: 'Badge (Seguridad Patrimonial)',
+            transporte: 'Transporte',
+            medico: 'Servicio Médico'
+        };
+        const areaLabel = areaNames[currentTab] || 'esta área';
+
+        Swal.fire({
+            title: '⚠️ ¡Aún Faltan Datos por Registrar!',
+            html: `Atención: Esta solicitud contiene <strong>${incompleteCount} registro(s)</strong> con datos requeridos incompletos para el área de <strong>${areaLabel}</strong>.<br><br>En la plantilla y reporte de Excel se indicará <span style="color:#dc2626; font-weight:bold;">"AÚN FALTAN DATOS POR REGISTRAR"</span>.`,
+            icon: 'warning',
+            confirmButtonText: 'Sí, ver Formatos',
+            confirmButtonColor: '#0078d4',
+            customClass: {
+                popup: 'safran-swal-popup'
+            }
+        });
+    }
+};
+
 window.RH.openFormatsModal = function(empId) {
     let emp = null;
     if (typeof empId === 'object' && empId !== null) {
@@ -77,6 +103,7 @@ window.RH.openFormatsModal = function(empId) {
 
     window.RH.switchFormatTab(window.RH.activeFormatTab || 'it');
     modal.classList.add('show');
+    window.RH.triggerIncompleteDataAlert(emp);
 };
 
 window.RH.openBatchFormatsModal = function(empsArray, dateLabel) {
@@ -100,6 +127,7 @@ window.RH.openBatchFormatsModal = function(empsArray, dateLabel) {
 
     window.RH.switchFormatTab(window.RH.activeFormatTab || 'it');
     modal.classList.add('show');
+    window.RH.triggerIncompleteDataAlert(empsArray);
 };
 
 window.RH.closeFormatsModal = function() {
