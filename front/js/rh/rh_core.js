@@ -174,6 +174,12 @@ document.addEventListener('change', function(e) {
 // ============================================
 window.RH.initDashboard = async function() {
     window.RH.updateDOM();
+
+    const mugEl = document.getElementById('mug');
+    if (mugEl) mugEl.removeAttribute('required');
+    const nomEl = document.getElementById('numero_nomina');
+    if (nomEl) nomEl.removeAttribute('required');
+
     const isLogged = await window.checkSession(true);
     if (isLogged) {
         window.setupLogout('btn-logout');

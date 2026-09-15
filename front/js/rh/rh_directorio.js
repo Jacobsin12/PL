@@ -62,6 +62,11 @@ window.RH.initDirectorio = function() {
     // MODAL EMPLEADO INDIVIDUAL (Nuevo / Editar)
     // ============================================
     window.RH.openModal = function() {
+        const mugEl = document.getElementById('mug');
+        if (mugEl) mugEl.removeAttribute('required');
+        const nomEl = document.getElementById('numero_nomina');
+        if (nomEl) nomEl.removeAttribute('required');
+
         if(window.RH.DOM.modalEmpleado) {
             window.RH.DOM.modalEmpleado.classList.add('show');
             
