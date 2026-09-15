@@ -153,7 +153,7 @@ window.RH.initMultiple = function() {
                             text: 'Se han guardado los registros con éxito. ¿Deseas abrir el generador de formatos por área?',
                             icon: 'success',
                             showCancelButton: true,
-                            confirmButtonText: '📧 Abrir Formatos',
+                            confirmButtonText: 'Abrir Formatos',
                             cancelButtonText: 'Cerrar',
                             confirmButtonColor: '#0078d4'
                         });

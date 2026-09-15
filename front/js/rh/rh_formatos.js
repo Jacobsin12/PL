@@ -62,7 +62,7 @@ window.RH.triggerIncompleteDataAlert = function(targetData) {
         const areaLabel = areaNames[currentTab] || 'esta área';
 
         Swal.fire({
-            title: '⚠️ ¡Aún Faltan Datos por Registrar!',
+            title: '¡Aún Faltan Datos por Registrar!',
             html: `Atención: Esta solicitud contiene <strong>${incompleteCount} registro(s)</strong> con datos requeridos incompletos para el área de <strong>${areaLabel}</strong>.<br><br>En la plantilla y reporte de Excel se indicará <span style="color:#dc2626; font-weight:bold;">"AÚN FALTAN DATOS POR REGISTRAR"</span>.`,
             icon: 'warning',
             confirmButtonText: 'Sí, ver Formatos',
@@ -215,7 +215,7 @@ window.RH.getFormatTemplate = function(formatType, empOrEmps) {
     const incompleteCount = window.RH.checkFormatIncomplete(formatType, [emp]);
     let noteText = "";
     if (incompleteCount > 0) {
-        noteText = `\n\n⚠️ NOTA: Esta solicitud contiene campos con "AÚN FALTAN DATOS POR REGISTRAR". Por favor tomar en cuenta para el seguimiento.`;
+        noteText = `\n\nNOTA: Esta solicitud contiene campos con "AÚN FALTAN DATOS POR REGISTRAR". Por favor tomar en cuenta para el seguimiento.`;
     }
     const defaultBody = `Buen día equipo, comparto los ingresos del día (${fechaStr}).${noteText}\n\nQuedo atento a cualquier duda o aclaración.\n\nAtentamente,\nRecursos Humanos - Safran`;
 
@@ -263,7 +263,7 @@ window.RH.getBatchFormatTemplate = function(formatType, emps) {
     const incompleteCount = window.RH.checkFormatIncomplete(formatType, emps);
     let noteText = "";
     if (incompleteCount > 0) {
-        noteText = `\n\n⚠️ NOTA: Esta solicitud contiene colaborador(es) con información pendiente por registrar ("AÚN FALTAN DATOS POR REGISTRAR").`;
+        noteText = `\n\nNOTA: Esta solicitud contiene colaborador(es) con información pendiente por registrar ("AÚN FALTAN DATOS POR REGISTRAR").`;
     }
     const defaultBody = `Buen día equipo, comparto los ingresos del día (${fechaStr}).${noteText}\n\nQuedo atento a cualquier duda o aclaración.\n\nAtentamente,\nRecursos Humanos - Safran`;
 
@@ -362,7 +362,7 @@ window.RH.switchFormatTab = function(formatType) {
             statusNoticeEl.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.15)';
             statusNoticeEl.innerHTML = `
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#dc2626" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                <span>🚨 ALERTA DE DATOS PENDIENTES: ${incompleteCount} registro(s) contienen información requerida sin llenar para este formato. En el reporte de Excel se marcarán en ROJO con "AÚN FALTAN DATOS POR REGISTRAR".</span>
+                <span>ALERTA DE DATOS PENDIENTES: ${incompleteCount} registro(s) contienen información requerida sin llenar para este formato. En el reporte de Excel se marcarán en ROJO con "AÚN FALTAN DATOS POR REGISTRAR".</span>
             `;
         } else {
             statusNoticeEl.style.background = '#dcfce7';
@@ -371,7 +371,7 @@ window.RH.switchFormatTab = function(formatType) {
             statusNoticeEl.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.15)';
             statusNoticeEl.innerHTML = `
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#16a34a" stroke-width="2.5" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                <span>✅ ¡INFORMACIÓN COMPLETA! Todos los datos requeridos para el formato de esta área se encuentran registrados correctamente.</span>
+                <span>INFORMACIÓN COMPLETA: Todos los datos requeridos para el formato de esta área se encuentran registrados correctamente.</span>
             `;
         }
     }
@@ -417,12 +417,12 @@ window.RH.openOutlookFormat = async function(formatType) {
 
         if (window.Swal) {
             const result = await Swal.fire({
-                title: '⚠️ ¡Aún Faltan Datos por Registrar!',
+                title: '¡Aún Faltan Datos por Registrar!',
                 html: `Se detectaron <strong>${incompleteCount} registro(s)</strong> con datos incompletos requeridos para el formato de <strong>${areaLabel}</strong>.<br><br>En la solicitud y reporte de Excel se incluirá la leyenda <span style="color:#dc2626; font-weight:bold;">"AÚN FALTAN DATOS POR REGISTRAR"</span>.<br><br>¿Deseas continuar y abrir el correo en Outlook de todos modos?`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: '📧 Sí, abrir Outlook',
-                cancelButtonText: '✏️ Cancelar y completar datos',
+                confirmButtonText: 'Sí, abrir Outlook',
+                cancelButtonText: 'Cancelar y completar datos',
                 confirmButtonColor: '#0078d4',
                 cancelButtonColor: '#6e7881',
                 customClass: {
