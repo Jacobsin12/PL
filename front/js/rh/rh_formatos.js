@@ -136,6 +136,46 @@ function extractFechaIngreso(empOrEmps) {
 }
 
 // ============================================
+// HELPER PARA VALIDAR DATOS INCOMPLETOS POR ÁREA
+// ============================================
+function getValOrMissing(val) {
+    if (val === null || val === undefined) return 'AÚN FALTAN DATOS POR REGISTRAR';
+    const s = String(val).trim();
+    if (s === '' || s === '-' || s === 'Sin área' || s === 'Sin planta') return 'AÚN FALTAN DATOS POR REGISTRAR';
+    return s;
+}
+
+window.RH.checkFormatIncomplete = function(formatType, empOrEmps) {
+    if (!empOrEmps) return 0;
+    const emps = Array.isArray(empOrEmps) ? empOrEmps : [empOrEmps];
+    const fieldsByFormat = {
+        it: ['mug', 'numero_nomina', 'nombre', 'apellido_paterno', 'puesto', 'jefe_directo', 'nombre_area', 'nombre_planta', 'fecha_ingreso'],
+        epp: ['numero_nomina', 'nombre', 'apellido_paterno', 'puesto', 'jefe_directo', 'nombre_area', 'talla_zapato', 'talla_pantalon', 'talla_playera', 'camisola', 'sobrelente'],
+        badge: ['numero_nomina', 'nombre', 'apellido_paterno', 'imss', 'curp', 'nombre_planta', 'nombre_area', 'puesto', 'tipo_alta', 'tarjeta_solicitada', 'numero_tarjeta', 'domicilio', 'ruta_acceso', 'ruta_entrada', 'parada_entrada', 'ruta_salida', 'parada_salida'],
+        transporte: ['numero_nomina', 'nombre', 'apellido_paterno', 'imss', 'curp', 'nombre_planta', 'nombre_area', 'puesto', 'tipo_alta', 'tarjeta_solicitada', 'numero_tarjeta', 'domicilio', 'ruta_acceso', 'ruta_entrada', 'parada_entrada', 'ruta_salida', 'parada_salida'],
+        medico: ['numero_nomina', 'nombre', 'apellido_paterno', 'puesto', 'nombre_area', 'nombre_planta', 'fecha_ingreso']
+    };
+
+    const fields = fieldsByFormat[formatType] || [];
+    let countIncomplete = 0;
+
+    emps.forEach(emp => {
+        let isEmpIncomplete = false;
+        fields.forEach(f => {
+            let val = emp[f];
+            if (f === 'nombre_area') val = val || emp.area;
+            if (f === 'nombre_planta') val = val || emp.planta;
+            if (val === null || val === undefined || String(val).trim() === '' || String(val).trim() === '-' || String(val).trim() === 'Sin área' || String(val).trim() === 'Sin planta') {
+                isEmpIncomplete = true;
+            }
+        });
+        if (isEmpIncomplete) countIncomplete++;
+    });
+
+    return countIncomplete;
+};
+
+// ============================================
 // GENERADOR DE PLANTILLAS INDIVIDUALES Y LOTE
 // ============================================
 window.RH.getFormatTemplate = function(formatType, empOrEmps) {
@@ -144,7 +184,12 @@ window.RH.getFormatTemplate = function(formatType, empOrEmps) {
     }
     const emp = empOrEmps;
     const fechaStr = extractFechaIngreso(emp);
-    const defaultBody = `Buen día equipo, comparto los ingresos del día (${fechaStr}).\n\nQuedo atento a cualquier duda o aclaración.\n\nAtentamente,\nRecursos Humanos - Safran`;
+    const incompleteCount = window.RH.checkFormatIncomplete(formatType, [emp]);
+    let noteText = "";
+    if (incompleteCount > 0) {
+        noteText = `\n\n⚠️ NOTA: Esta solicitud contiene campos con "AÚN FALTAN DATOS POR REGISTRAR". Por favor tomar en cuenta para el seguimiento.`;
+    }
+    const defaultBody = `Buen día equipo, comparto los ingresos del día (${fechaStr}).${noteText}\n\nQuedo atento a cualquier duda o aclaración.\n\nAtentamente,\nRecursos Humanos - Safran`;
 
     if (formatType === 'it') {
         return {
@@ -187,7 +232,12 @@ window.RH.getFormatTemplate = function(formatType, empOrEmps) {
 window.RH.getBatchFormatTemplate = function(formatType, emps) {
     const count = emps.length;
     const fechaStr = extractFechaIngreso(emps);
-    const defaultBody = `Buen día equipo, comparto los ingresos del día (${fechaStr}).\n\nQuedo atento a cualquier duda o aclaración.\n\nAtentamente,\nRecursos Humanos - Safran`;
+    const incompleteCount = window.RH.checkFormatIncomplete(formatType, emps);
+    let noteText = "";
+    if (incompleteCount > 0) {
+        noteText = `\n\n⚠️ NOTA: Esta solicitud contiene colaborador(es) con información pendiente por registrar ("AÚN FALTAN DATOS POR REGISTRAR").`;
+    }
+    const defaultBody = `Buen día equipo, comparto los ingresos del día (${fechaStr}).${noteText}\n\nQuedo atento a cualquier duda o aclaración.\n\nAtentamente,\nRecursos Humanos - Safran`;
 
     if (formatType === 'it') {
         return {
@@ -257,6 +307,30 @@ window.RH.switchFormatTab = function(formatType) {
     if (cardDest) cardDest.textContent = tpl.dest;
     if (subjectInput) subjectInput.value = tpl.subject;
     if (bodyTextarea) bodyTextarea.value = tpl.body;
+
+    const incompleteCount = window.RH.checkFormatIncomplete(formatType, targetEmpData);
+    let statusNoticeEl = document.getElementById('format-status-notice');
+    if (!statusNoticeEl) {
+        statusNoticeEl = document.createElement('div');
+        statusNoticeEl.id = 'format-status-notice';
+        if (cardTitle && cardTitle.parentElement) {
+            cardTitle.parentElement.insertBefore(statusNoticeEl, cardTitle.nextSibling);
+        }
+    }
+    if (incompleteCount > 0 && statusNoticeEl) {
+        statusNoticeEl.style.display = 'block';
+        statusNoticeEl.style.margin = '0.5rem 0 1rem';
+        statusNoticeEl.style.padding = '0.6rem 1rem';
+        statusNoticeEl.style.background = '#fff7ed';
+        statusNoticeEl.style.border = '1px solid #ffedd5';
+        statusNoticeEl.style.borderRadius = '8px';
+        statusNoticeEl.style.color = '#c2410c';
+        statusNoticeEl.style.fontSize = '0.85rem';
+        statusNoticeEl.style.fontWeight = '600';
+        statusNoticeEl.innerHTML = `⚠️ Atención: ${incompleteCount} registro(s) contienen datos pendientes. En el reporte de Excel y correo se indicará "AÚN FALTAN DATOS POR REGISTRAR" en los campos correspondientes.`;
+    } else if (statusNoticeEl) {
+        statusNoticeEl.style.display = 'none';
+    }
 
     // Cargar destinatarios y copia guardados
     const cfg = window.RH.getStoredEmailConfig();
@@ -502,32 +576,35 @@ window.RH.exportAreaExcel = function(formatType) {
         ];
     }
 
-    const mappedData = emps.map(emp => ({
-        mug: emp.mug || '-',
-        numero_nomina: emp.numero_nomina || '-',
-        nombreCompleto: `${emp.nombre || ''} ${emp.apellido_paterno || ''} ${emp.apellido_materno || ''}`.trim(),
-        puesto: emp.puesto || '-',
-        jefe_directo: emp.jefe_directo || '-',
-        nombre_area: emp.nombre_area || emp.area || 'Sin área',
-        nombre_planta: emp.nombre_planta || emp.planta || 'Sin planta',
-        fecha_ingreso: emp.fecha_ingreso ? emp.fecha_ingreso.split(' ')[0] : '-',
-        imss: emp.imss || '-',
-        curp: emp.curp || '-',
-        domicilio: emp.domicilio || '-',
-        tipo_alta: emp.tipo_alta || 'Nuevo Ingreso',
-        talla_zapato: emp.talla_zapato || '-',
-        talla_pantalon: emp.talla_pantalon || '-',
-        talla_playera: emp.talla_playera || '-',
-        camisola: emp.camisola || '-',
-        sobrelente: emp.sobrelente || '-',
-        tarjeta_solicitada: emp.tarjeta_solicitada || '-',
-        numero_tarjeta: emp.numero_tarjeta || '-',
-        ruta_acceso: emp.ruta_acceso || '-',
-        ruta_entrada: emp.ruta_entrada || '-',
-        parada_entrada: emp.parada_entrada || '-',
-        ruta_salida: emp.ruta_salida || '-',
-        parada_salida: emp.parada_salida || '-'
-    }));
+    const mappedData = emps.map(emp => {
+        const nombreComp = `${emp.nombre || ''} ${emp.apellido_paterno || ''} ${emp.apellido_materno || ''}`.trim();
+        return {
+            mug: getValOrMissing(emp.mug),
+            numero_nomina: getValOrMissing(emp.numero_nomina),
+            nombreCompleto: getValOrMissing(nombreComp),
+            puesto: getValOrMissing(emp.puesto),
+            jefe_directo: getValOrMissing(emp.jefe_directo),
+            nombre_area: getValOrMissing(emp.nombre_area || emp.area),
+            nombre_planta: getValOrMissing(emp.nombre_planta || emp.planta),
+            fecha_ingreso: getValOrMissing(emp.fecha_ingreso ? emp.fecha_ingreso.split(' ')[0] : ''),
+            imss: getValOrMissing(emp.imss),
+            curp: getValOrMissing(emp.curp),
+            domicilio: getValOrMissing(emp.domicilio),
+            tipo_alta: getValOrMissing(emp.tipo_alta),
+            talla_zapato: getValOrMissing(emp.talla_zapato),
+            talla_pantalon: getValOrMissing(emp.talla_pantalon),
+            talla_playera: getValOrMissing(emp.talla_playera),
+            camisola: getValOrMissing(emp.camisola),
+            sobrelente: getValOrMissing(emp.sobrelente),
+            tarjeta_solicitada: getValOrMissing(emp.tarjeta_solicitada),
+            numero_tarjeta: getValOrMissing(emp.numero_tarjeta),
+            ruta_acceso: getValOrMissing(emp.ruta_acceso),
+            ruta_entrada: getValOrMissing(emp.ruta_entrada),
+            parada_entrada: getValOrMissing(emp.parada_entrada),
+            ruta_salida: getValOrMissing(emp.ruta_salida),
+            parada_salida: getValOrMissing(emp.parada_salida)
+        };
+    });
 
     if (typeof window.exportStyledExcel === 'function') {
         window.exportStyledExcel({

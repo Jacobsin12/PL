@@ -80,15 +80,15 @@ window.RH.initMultiple = function() {
                 <td class="row-number">${i + 1}</td>
                 <td><input type="text" name="mug[]" placeholder="MUG (Opcional)"></td>
                 <td><input type="text" name="numero_nomina[]" placeholder="Nómina (Opcional)"></td>
-                <td><input type="text" name="nombre[]" required placeholder="Nombre"></td>
-                <td><input type="text" name="apellido_paterno[]" required placeholder="Ap. Paterno"></td>
-                <td><input type="text" name="apellido_materno[]" required placeholder="Ap. Materno"></td>
-                <td><input type="text" name="puesto[]" required placeholder="Puesto"></td>
+                <td><input type="text" name="nombre[]" required placeholder="Nombre *"></td>
+                <td><input type="text" name="apellido_paterno[]" required placeholder="Ap. Paterno *"></td>
+                <td><input type="text" name="apellido_materno[]" placeholder="Ap. Materno"></td>
+                <td><input type="text" name="puesto[]" placeholder="Puesto"></td>
                 <td><input type="text" name="jefe_directo[]" placeholder="Jefe"></td>
-                <td><select name="id_planta[]" required>${optsPlanta}</select></td>
-                <td><select name="id_area[]" required>${optsArea}</select></td>
-                <td><select name="id_tipo[]" required>${optsTipo}</select></td>
-                <td><input type="date" name="fecha_ingreso[]" required></td>
+                <td><select name="id_planta[]">${optsPlanta}</select></td>
+                <td><select name="id_area[]">${optsArea}</select></td>
+                <td><select name="id_tipo[]">${optsTipo}</select></td>
+                <td><input type="date" name="fecha_ingreso[]"></td>
                 <td><input type="text" name="imss[]" placeholder="IMSS / NSS"></td>
                 <td><input type="text" name="curp[]" placeholder="CURP"></td>
                 <td><input type="text" name="domicilio[]" placeholder="Domicilio"></td>

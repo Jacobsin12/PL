@@ -91,8 +91,8 @@ try {
             $countWithMug = 0;
 
             foreach ($items as $item) {
-                if (empty($item['nombre'])) {
-                    throw new Exception('Falta el nombre de colaborador en al menos un registro.');
+                if (empty($item['nombre']) || empty($item['apellido_paterno'])) {
+                    throw new Exception('Falta el nombre o apellido paterno del colaborador en al menos un registro.');
                 }
                 
                 $mugVal = isset($item['mug']) ? trim($item['mug']) : '';
@@ -208,17 +208,17 @@ try {
                  
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            ':mug' => $data['mug'],
-            ':numero_nomina' => $data['numero_nomina'],
-            ':nombre' => $data['nombre'],
-            ':apellido_paterno' => $data['apellido_paterno'],
-            ':apellido_materno' => $data['apellido_materno'],
-            ':puesto' => $data['puesto'],
-            ':jefe_directo' => $data['jefe_directo'],
-            ':id_planta' => $data['id_planta'],
-            ':id_area' => $data['id_area'],
-            ':id_tipo' => $data['id_tipo'],
-            ':fecha_ingreso' => $data['fecha_ingreso'],
+            ':mug' => $data['mug'] ?? '',
+            ':numero_nomina' => $data['numero_nomina'] ?? '',
+            ':nombre' => $data['nombre'] ?? '',
+            ':apellido_paterno' => $data['apellido_paterno'] ?? '',
+            ':apellido_materno' => $data['apellido_materno'] ?? '',
+            ':puesto' => $data['puesto'] ?? '',
+            ':jefe_directo' => $data['jefe_directo'] ?? '',
+            ':id_planta' => !empty($data['id_planta']) ? $data['id_planta'] : null,
+            ':id_area' => !empty($data['id_area']) ? $data['id_area'] : null,
+            ':id_tipo' => !empty($data['id_tipo']) ? $data['id_tipo'] : null,
+            ':fecha_ingreso' => !empty($data['fecha_ingreso']) ? $data['fecha_ingreso'] : null,
             ':imss' => $data['imss'] ?? null,
             ':curp' => $data['curp'] ?? null,
             ':domicilio' => $data['domicilio'] ?? null,
