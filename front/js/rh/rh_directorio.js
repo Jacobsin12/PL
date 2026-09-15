@@ -89,6 +89,9 @@ window.RH.initDirectorio = function() {
                     }
                 }
             }
+            if (typeof window.RH.highlightFilledInputs === 'function' && window.RH.DOM.formEmpleado) {
+                window.RH.highlightFilledInputs(window.RH.DOM.formEmpleado);
+            }
         }
     };
     
@@ -100,6 +103,9 @@ window.RH.initDirectorio = function() {
         const fechaRegEl = document.getElementById('fecha_registro');
         if (fechaRegEl) fechaRegEl.value = '';
         if(window.RH.DOM.modalTitle) window.RH.DOM.modalTitle.textContent = "Nuevo Empleado";
+        if (typeof window.RH.highlightFilledInputs === 'function' && window.RH.DOM.formEmpleado) {
+            window.RH.highlightFilledInputs(window.RH.DOM.formEmpleado);
+        }
     };
 
     window.RH.addToCarga = function(dateKey) {
@@ -239,6 +245,9 @@ window.RH.initDirectorio = function() {
         }
         
         window.RH.openModal();
+        if (typeof window.RH.highlightFilledInputs === 'function' && window.RH.DOM.formEmpleado) {
+            window.RH.highlightFilledInputs(window.RH.DOM.formEmpleado);
+        }
     };
 
     window.RH.deleteEmpleado = async function(id) {

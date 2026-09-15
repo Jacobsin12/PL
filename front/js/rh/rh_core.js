@@ -107,7 +107,25 @@ window.RH.attachInputValidations = function(container) {
     });
 };
 
-// Delegación global para asegurar mayúsculas en tiempo real en todos los formularios de ingreso (individual y múltiple)
+window.RH.highlightFilledInputs = function(container) {
+    if (!container) return;
+    const inputs = container.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
+        if (el.type === 'hidden' || el.type === 'button' || el.type === 'submit') return;
+        const val = (el.value || '').trim();
+        if (val !== '') {
+            el.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'; // Verde suave iluminado
+            el.style.border = '1px solid #10b981';
+            el.style.boxShadow = '0 0 4px rgba(16, 185, 129, 0.25)';
+        } else {
+            el.style.backgroundColor = '';
+            el.style.border = '';
+            el.style.boxShadow = '';
+        }
+    });
+};
+
+// Delegación global para asegurar mayúsculas y resaltado en tiempo real en todos los formularios
 document.addEventListener('input', function(e) {
     const target = e.target;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
@@ -128,16 +146,18 @@ document.addEventListener('input', function(e) {
         }
 
         // Lógica de Color (Feedback Visual)
-        if (target.closest('.excel-grid, #form-empleado')) {
+        if (target.closest('.excel-grid, #form-empleado, #modal-empleado')) {
             if (target.value.trim() !== '') {
-                target.style.backgroundColor = 'rgba(16, 185, 129, 0.08)'; // Verde clarito
-                target.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                target.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'; // Verde suave iluminado
+                target.style.border = '1px solid #10b981';
+                target.style.boxShadow = '0 0 4px rgba(16, 185, 129, 0.25)';
             } else {
                 target.style.backgroundColor = ''; // Restablecer
                 target.style.border = ''; // Restablecer
+                target.style.boxShadow = ''; // Restablecer
             }
 
-            // Verificar si la fila completa está lista (basado en campos required)
+            // Verificar si la fila completa está lista en tablas múltiples
             const tr = target.closest('tr');
             if (tr) {
                 const requireds = tr.querySelectorAll('input[required], select[required]');
@@ -149,7 +169,7 @@ document.addEventListener('input', function(e) {
                 const rowNum = tr.querySelector('.row-number');
                 if (rowNum) {
                     if (allFilled && requireds.length > 0) {
-                        rowNum.style.backgroundColor = 'rgba(16, 185, 129, 0.2)'; // Verde más fuerte
+                        rowNum.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
                         rowNum.style.color = '#047857';
                     } else {
                         rowNum.style.backgroundColor = '';
