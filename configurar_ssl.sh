@@ -5,8 +5,10 @@
 
 set -e
 
-DOMAIN=$1
-EMAIL=$2
+# Limpiar el dominio en caso de que incluyan http://, https:// o barras al final
+RAW_DOMAIN=$1
+DOMAIN=$(echo "$RAW_DOMAIN" | sed -e 's|^https\?://||' -e 's|/.*$||' | tr -d '[:space:]')
+EMAIL=$(echo "$2" | tr -d '[:space:]')
 
 if [ -z "$DOMAIN" ]; then
     echo "❌ Error: Debes ingresar tu nombre de dominio."
