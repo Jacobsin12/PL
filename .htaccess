@@ -1,0 +1,13 @@
+# Configuración de Apache para ManeU
+DirectoryIndex index.php front/login.html
+
+# Proteger archivos sensibles
+<FilesMatch "^\.env|^\.git">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Opciones de reescritura
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>

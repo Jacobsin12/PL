@@ -83,6 +83,9 @@ window.RH.loadEmpleados = async function() {
             window.RH.empleadosData = json.data;
             if (window.RH.renderTable) window.RH.renderTable(window.RH.empleadosData);
             if (window.RH.refreshAltas) window.RH.refreshAltas();
+            if (typeof window.loadDashboardData === 'function') {
+                window.loadDashboardData();
+            }
         }
     } catch(e) {
         console.error("Error al cargar empleados", e);
@@ -105,6 +108,56 @@ window.RH.attachInputValidations = function(container) {
             }
         });
     });
+};
+
+window.RH.getEmpMissingFields = function(emp) {
+    if (!emp) return ['Información completa del colaborador'];
+    const missing = [];
+    const isEmpty = (val, badValues = []) => {
+        if (val === null || val === undefined) return true;
+        const s = String(val).trim().toLowerCase();
+        if (s === '' || s === '-' || s === 'null' || s === 'undefined' || s === '0') return true;
+        return badValues.some(b => s === b.toLowerCase());
+    };
+
+    if (isEmpty(emp.mug)) missing.push('MUG');
+    if (isEmpty(emp.numero_nomina)) missing.push('No. Nómina');
+    if (isEmpty(emp.nombre)) missing.push('Nombre');
+    if (isEmpty(emp.apellido_paterno)) missing.push('Apellido Paterno');
+    if (isEmpty(emp.puesto, ['sin asignar', 'sin puesto'])) missing.push('Puesto');
+    if (isEmpty(emp.jefe_directo)) missing.push('Jefe Directo');
+
+    const areaVal = emp.nombre_area || emp.area;
+    if (!emp.id_area && isEmpty(areaVal, ['sin área', 'sin area'])) missing.push('Área');
+
+    const plantaVal = emp.nombre_planta || emp.planta;
+    if (!emp.id_planta && isEmpty(plantaVal, ['sin planta'])) missing.push('Planta');
+
+    if (isEmpty(emp.fecha_ingreso, ['0000-00-00', '0000-00-00 00:00:00'])) missing.push('Fecha de Ingreso');
+    
+    // Datos extendidos (EPP, Seguridad, Transporte, Identificación)
+    if (isEmpty(emp.imss)) missing.push('IMSS');
+    if (isEmpty(emp.curp)) missing.push('CURP');
+    if (isEmpty(emp.domicilio)) missing.push('Domicilio');
+    if (isEmpty(emp.talla_zapato)) missing.push('Talla Zapato');
+    if (isEmpty(emp.talla_pantalon)) missing.push('Talla Pantalón');
+    if (isEmpty(emp.talla_playera)) missing.push('Talla Playera');
+    if (isEmpty(emp.camisola)) missing.push('Camisola');
+    if (isEmpty(emp.sobrelente)) missing.push('Sobrelente');
+    if (isEmpty(emp.tarjeta_solicitada)) missing.push('Tarjeta Solicitada');
+    if (isEmpty(emp.ruta_acceso)) missing.push('Ruta Acceso');
+    if (isEmpty(emp.ruta_entrada)) missing.push('Ruta Entrada');
+    if (isEmpty(emp.parada_entrada)) missing.push('Parada Entrada');
+    if (isEmpty(emp.ruta_salida)) missing.push('Ruta Salida');
+    if (isEmpty(emp.parada_salida)) missing.push('Parada Salida');
+
+    return missing;
+};
+
+window.RH.isEmpIncompleteGeneral = function(emp) {
+    if (!emp) return false;
+    const missing = window.RH.getEmpMissingFields(emp);
+    return missing.length > 0;
 };
 
 window.RH.highlightFilledInputs = function(container) {

@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initNotificacionesModule();
 });
 
-window.lastNotifiedId = null;
+let isFirstNotificationCheck = true;
+window.lastNotifiedId = parseInt(localStorage.getItem('last_notified_id') || '0', 10) || null;
 
 function initNotificacionesModule() {
     const btnMarkAll = document.getElementById('btn-page-mark-all-read');
@@ -29,7 +30,7 @@ function initNotificacionesModule() {
     }
 
     updateNotifBadges();
-    setInterval(updateNotifBadges, 15000); // Revisar cada 15 segundos para ser más rápido
+    setInterval(updateNotifBadges, 15000); // Revisar cada 15 segundos
 }
 
 /* Actualizar badges de conteo en la barra lateral */
@@ -52,23 +53,40 @@ async function updateNotifBadges() {
                 }
             }
             
-            // Disparar Notificación Nativa Push si hay una nueva
-            if (data.latest_unread && window.lastNotifiedId !== data.latest_unread.id_notificacion) {
-                window.lastNotifiedId = data.latest_unread.id_notificacion;
-                
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    const notif = new Notification(data.latest_unread.titulo, {
-                        body: data.latest_unread.mensaje,
-                        icon: 'assets/safran_logo.png' // Asegurar que haya un logo o fallará silenciosamente sin icono
-                    });
-                    
-                    notif.onclick = function() {
-                        window.focus();
-                        this.close();
-                        const btnBell = document.getElementById('btn-nav-notificaciones');
-                        if(btnBell) btnBell.click(); // Abrir panel
-                    };
+            // Disparar Notificación Nativa Push SOLO para notificaciones verdaderamente nuevas que lleguen durante la sesión
+            if (data.latest_unread) {
+                const latestId = parseInt(data.latest_unread.id_notificacion, 10);
+                const savedLastId = parseInt(localStorage.getItem('last_notified_id') || '0', 10);
+
+                if (isFirstNotificationCheck) {
+                    // En la primera carga o recarga de la página, sincronizamos el último ID sin volver a lanzar la notificación emergente
+                    const maxId = Math.max(latestId, savedLastId);
+                    localStorage.setItem('last_notified_id', maxId);
+                    window.lastNotifiedId = maxId;
+                    isFirstNotificationCheck = false;
+                } else {
+                    // En revisiones periódicas (polling), solo notificar si realmente llegó una nueva
+                    if (latestId > savedLastId && window.lastNotifiedId !== latestId) {
+                        window.lastNotifiedId = latestId;
+                        localStorage.setItem('last_notified_id', latestId);
+                        
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            const notif = new Notification(data.latest_unread.titulo, {
+                                body: data.latest_unread.mensaje,
+                                icon: 'assets/images/Safran-logo.png'
+                            });
+                            
+                            notif.onclick = function() {
+                                window.focus();
+                                this.close();
+                                const notifNav = document.querySelector('.nav-item[data-target="view-notificaciones"]') || document.getElementById('btn-nav-notificaciones');
+                                if (notifNav) notifNav.click();
+                            };
+                        }
+                    }
                 }
+            } else {
+                isFirstNotificationCheck = false;
             }
         }
     } catch (err) {

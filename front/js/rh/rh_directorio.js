@@ -14,18 +14,37 @@ window.RH.initDirectorio = function() {
         window.RH.DOM.tableBody.innerHTML = '';
         data.forEach(emp => {
             const tr = document.createElement('tr');
-            const mugHTML = emp.mug ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
+            const isIncomplete = window.RH.isEmpIncompleteGeneral ? window.RH.isEmpIncompleteGeneral(emp) : (!emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-');
+
+            const missingList = window.RH.getEmpMissingFields ? window.RH.getEmpMissingFields(emp) : [];
+            const missingTitle = missingList.length > 0 ? `Faltan por registrar: ${missingList.join(', ')}` : 'Información completa';
+
+            if (isIncomplete) {
+                tr.style.backgroundColor = 'rgba(245, 158, 11, 0.12)'; // Amarillo suave (Información incompleta)
+                tr.style.borderLeft = '4px solid #f59e0b';
+                tr.title = missingTitle;
+            }
+
+            const warningIconSVG = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#d97706" stroke-width="2.5" fill="none" style="vertical-align:-2px; margin-left:4px;" title="${missingTitle}"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
+            const mugHTML = emp.mug && emp.mug.trim() !== '' && emp.mug.trim() !== '-' ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
                 <span>${emp.mug}</span>
                 <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </span>` : '-';
+            </span>` : '<span style="color:#b45309; font-weight:700; font-size:0.75rem; background:#fef3c7; border:1px solid #fde68a; padding:2px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:2px;" title="MUG Pendiente"><svg viewBox="0 0 24 24" width="11" height="11" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Sin MUG</span>';
+
+            const nominaHTML = emp.numero_nomina && emp.numero_nomina.trim() !== '' && emp.numero_nomina.trim() !== '-' ? emp.numero_nomina : '<span style="color:#b45309; font-weight:600; font-size:0.8rem;" title="Nómina Pendiente">-</span>';
+
+            const statusBadgeHTML = isIncomplete 
+                ? `<span class="badge-status-custom" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;" title="${missingTitle}"><svg viewBox="0 0 24 24" width="13" height="13" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Faltan datos</span>`
+                : `<span class="badge-status completada" style="font-size:0.75rem;">Completo</span>`;
 
             tr.innerHTML = `
                 <td>${mugHTML}</td>
-                <td>${emp.numero_nomina}</td>
-                <td>${emp.nombre} ${emp.apellido_paterno} ${emp.apellido_materno}</td>
-                <td><span class="badge" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--card-border);">${emp.puesto}</span></td>
-                <td><span style="color:#2563eb; font-weight:600;">${emp.nombre_area || ''}</span></td>
-                <td><span style="color:#059669; font-weight:500;">${emp.nombre_planta || ''}</span></td>
+                <td>${nominaHTML}</td>
+                <td><strong>${emp.nombre || ''} ${emp.apellido_paterno || ''} ${emp.apellido_materno || ''}</strong> ${isIncomplete ? warningIconSVG : ''} ${statusBadgeHTML}</td>
+                <td><span class="badge" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--card-border);">${emp.puesto || 'Sin asignar'}</span></td>
+                <td><span style="color:#2563eb; font-weight:600;">${emp.nombre_area || 'Sin área'}</span></td>
+                <td><span style="color:#059669; font-weight:500;">${emp.nombre_planta || 'Sin planta'}</span></td>
                 <td class="actions-cell">
                     <button class="btn-formats" onclick="window.RH.openFormatsModal(${emp.id_ingreso})" title="Formatos de Envío a Áreas (Outlook)" style="background: none; border: none; color: #0055a5; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
                         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
@@ -251,6 +270,11 @@ window.RH.initDirectorio = function() {
     };
 
     window.RH.deleteEmpleado = async function(id) {
+        if (!id) {
+            window.showAlert("No se especificó el ID del empleado a eliminar.", "Error", "error");
+            return;
+        }
+
         const ok = await window.showConfirm(
             "¿Estás seguro de eliminar este empleado? Esta acción no se puede deshacer.",
             "Eliminar Empleado",
@@ -261,8 +285,10 @@ window.RH.initDirectorio = function() {
         if(!ok) return;
 
         try {
-            const res = await fetch('../back/api/api_empleados.php?id=' + id, {
-                method: 'DELETE'
+            const res = await fetch('../back/api/api_empleados.php?id=' + encodeURIComponent(id), {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_ingreso: id })
             });
             const json = await res.json();
             if(json.status === 'success') {
@@ -276,4 +302,6 @@ window.RH.initDirectorio = function() {
             window.showAlert("Error de conexión al servidor", "Error de Red", "error");
         }
     };
+
+    window.deleteEmpleado = window.RH.deleteEmpleado;
 };

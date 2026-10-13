@@ -1,16 +1,34 @@
 <?php
 date_default_timezone_set('America/Mexico_City');
 
+// Cargar variables desde archivo .env si existe en la raíz del proyecto
+$envFile = __DIR__ . '/../../.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || strpos($line, '#') === 0) continue;
+        if (strpos($line, '=') !== false) {
+            list($envName, $envVal) = explode('=', $line, 2);
+            $envName = trim($envName);
+            $envVal = trim($envVal, " \t\n\r\0\x0B\"'");
+            putenv("$envName=$envVal");
+            $_ENV[$envName] = $envVal;
+            $_SERVER[$envName] = $envVal;
+        }
+    }
+}
+
 // Detectar si estamos en entorno local (localhost / 127.0.0.1)
 $isLocal = !isset($_SERVER['HTTP_HOST']) || (
     strpos($_SERVER['HTTP_HOST'], 'localhost') !== false ||
     strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false
 );
 
-// 1. Si existe URL de base de datos en la nube (Render / Supabase) y NO estamos en localhost
+// 1. Si existe URL de base de datos en la nube (Render / Supabase / AWS)
 $dbUrl = getenv('INTERNAL_DATABASE_URL') ?: getenv('DATABASE_URL') ?: getenv('EXTERNAL_DATABASE_URL');
 
-if ($dbUrl && !$isLocal) {
+if ($dbUrl && (!$isLocal || getenv('FORCE_CLOUD_DB') === 'true')) {
     $parsed   = parse_url($dbUrl);
     $driver   = 'pgsql';
     $host     = $parsed['host'] ?? 'localhost';

@@ -26,7 +26,9 @@ window.renderReport = async () => {
     const pdfTitle = document.getElementById("pdf-title");
     
     if(pdfDate) pdfDate.textContent = `Fecha: ${new Date().toLocaleDateString('es-MX')}`;
-    if(pdfTitle) pdfTitle.textContent = `Reporte Ejecutivo Service Desk`;
+    if(pdfTitle && (!pdfTitle.textContent || !pdfTitle.textContent.trim())) {
+        pdfTitle.textContent = `Reporte Ejecutivo Service Desk`;
+    }
     
     // Cargar datos solo si no han sido inicializados aún (evita bucle infinito cuando el arreglo está vacío)
     if (window.currentTableData === undefined || window.currentTableData === null) {
@@ -73,6 +75,11 @@ window.renderReport = async () => {
             badgesHtml += `<span class="badge-planta-kpi" style="display:inline-flex; align-items:center; gap:0.3rem; padding:0.25rem 0.6rem; border-radius:6px; background:rgba(16,185,129,0.12); color:#10b981; font-weight:600; font-size:0.8rem; border:1px solid rgba(16,185,129,0.25);">${pName}: <strong>${plantaCounts[pName]}</strong></span> `;
         });
         elPlantas.innerHTML = badgesHtml || '<span style="color:var(--text-muted); font-size:0.85rem;">Sin registros</span>';
+    }
+
+    const tableAreaEl = document.getElementById('table-area');
+    if (tableAreaEl && tableAreaEl.options.length <= 1 && typeof window.populateSelects === 'function') {
+        window.populateSelects();
     }
 
     updatePieChart();

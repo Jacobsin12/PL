@@ -240,16 +240,27 @@ function renderCargasBlocksIT(data) {
             const statusClass = item.estatus === 'completada' ? 'completada' : (item.correo_asignado ? 'proceso' : 'pendiente');
             const fechaIngresoStr = item.fecha_ingreso ? item.fecha_ingreso.split(' ')[0] : (item.fecha_registro ? item.fecha_registro.split(' ')[0] : '');
 
-            const mugHTML = item.mug ? `<span class="copyable-mug" data-mug="${item.mug}" title="Clic para copiar MUG">
+            const isIncomplete = (window.RH && typeof window.RH.isEmpIncompleteGeneral === 'function')
+                ? window.RH.isEmpIncompleteGeneral(item)
+                : (!item.mug || item.mug.trim() === '' || item.mug.trim() === '-');
+
+            const missingList = (window.RH && typeof window.RH.getEmpMissingFields === 'function') ? window.RH.getEmpMissingFields(item) : [];
+            const missingTitle = missingList.length > 0 ? `Faltan por registrar por RH: ${missingList.join(', ')}` : 'Información general completa';
+
+            const warningIconSVG = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#d97706" stroke-width="2.5" fill="none" style="vertical-align:-2px; margin-left:4px;" title="${missingTitle}"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
+            const mugHTML = item.mug && item.mug.trim() !== '' && item.mug.trim() !== '-' ? `<span class="copyable-mug" data-mug="${item.mug}" title="Clic para copiar MUG">
                 <span>${item.mug}</span>
                 <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </span>` : '-';
+            </span>` : '<span style="color:#b45309; font-weight:700; font-size:0.75rem; background:#fef3c7; border:1px solid #fde68a; padding:2px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:2px;" title="MUG Pendiente"><svg viewBox="0 0 24 24" width="11" height="11" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Sin MUG</span>';
+
+            const trBg = isIncomplete ? `style="background-color: rgba(245, 158, 11, 0.12); border-left: 4px solid #f59e0b;" title="${missingTitle}"` : '';
 
             tableHTML += `
-                <tr data-config-id="${item.id_config || ''}" data-ingreso-id="${item.id_ingreso}">
+                <tr data-config-id="${item.id_config || ''}" data-ingreso-id="${item.id_ingreso}" ${trBg}>
                     <td style="padding: 0.6rem 1rem;">${mugHTML}</td>
-                    <td style="padding: 0.6rem 1rem;">${item.numero_nomina || '-'}</td>
-                    <td style="padding: 0.6rem 1rem;"><strong>${item.nombre} ${item.apellido_paterno} ${item.apellido_materno || ''}</strong></td>
+                    <td style="padding: 0.6rem 1rem;">${item.numero_nomina || '<span style="color:#b45309; font-weight:600;">-</span>'}</td>
+                    <td style="padding: 0.6rem 1rem;"><strong>${item.nombre} ${item.apellido_paterno} ${item.apellido_materno || ''}</strong> ${isIncomplete ? warningIconSVG : ''}</td>
                     <td style="padding: 0.6rem 1rem;">${item.puesto}<br><span style="font-size:0.75rem; color:#2563eb;">${item.nombre_area || ''}</span></td>
                     <td style="padding: 0.6rem 1rem;">
                         <span class="badge-status ${statusClass}" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; border-radius: 12px;">${statusText}</span>
@@ -347,16 +358,30 @@ function renderGeneralTableIT(data) {
     data.forEach(item => {
         let defaultCorreo = item.correo_asignado || generateDefaultEmailIT(item.nombre, item.apellido_paterno);
 
-        const mugHTML = item.mug ? `<span class="copyable-mug" data-mug="${item.mug}" title="Clic para copiar MUG">
+        const isIncomplete = (window.RH && typeof window.RH.isEmpIncompleteGeneral === 'function')
+            ? window.RH.isEmpIncompleteGeneral(item)
+            : (!item.mug || item.mug.trim() === '' || item.mug.trim() === '-');
+
+        const missingList = (window.RH && typeof window.RH.getEmpMissingFields === 'function') ? window.RH.getEmpMissingFields(item) : [];
+        const missingTitle = missingList.length > 0 ? `Faltan por registrar por RH: ${missingList.join(', ')}` : 'Información general completa';
+
+        const warningIconSVG = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#d97706" stroke-width="2.5" fill="none" style="vertical-align:-2px; margin-left:4px;" title="${missingTitle}"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
+        const mugHTML = item.mug && item.mug.trim() !== '' && item.mug.trim() !== '-' ? `<span class="copyable-mug" data-mug="${item.mug}" title="Clic para copiar MUG">
             <span>${item.mug}</span>
             <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-        </span>` : '-';
+        </span>` : '<span style="color:#b45309; font-weight:700; font-size:0.75rem; background:#fef3c7; border:1px solid #fde68a; padding:2px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:2px;" title="MUG Pendiente"><svg viewBox="0 0 24 24" width="11" height="11" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Sin MUG</span>';
 
         const tr = document.createElement('tr');
+        if (isIncomplete) {
+            tr.style.backgroundColor = 'rgba(245, 158, 11, 0.12)';
+            tr.style.borderLeft = '4px solid #f59e0b';
+            tr.title = missingTitle;
+        }
         tr.innerHTML = `
             <td>${mugHTML}</td>
-            <td>${item.numero_nomina || '-'}</td>
-            <td><strong>${item.nombre} ${item.apellido_paterno} ${item.apellido_materno || ''}</strong></td>
+            <td>${item.numero_nomina || '<span style="color:#b45309; font-weight:600;">-</span>'}</td>
+            <td><strong>${item.nombre} ${item.apellido_paterno} ${item.apellido_materno || ''}</strong> ${isIncomplete ? warningIconSVG : ''}</td>
             <td>${item.puesto} <br><span style="font-size:0.75rem; color:#2563eb;">${item.nombre_area || ''}</span></td>
             <td>${item.fecha_registro ? item.fecha_registro.split(' ')[0] : ''}</td>
             <td><span style="font-family: monospace; font-size:0.85rem; color:#059669;">${defaultCorreo}</span></td>

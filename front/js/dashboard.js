@@ -104,6 +104,7 @@ async function loadDashboardData() {
         const json = await res.json();
         
         if(json.status === 'success' && Array.isArray(json.data)) {
+            window.hasLoadedDashboardOnce = true;
             window.currentTableData = json.data.map(item => ({
                 mug: item.mug,
                 numero_nomina: item.numero_nomina,
@@ -169,6 +170,8 @@ async function loadCatalogos() {
         if(json.status === 'success') {
             globalAreas = json.data.areas.map(a => a.nombre_area);
             globalPlantas = json.data.plantas.map(p => p.nombre_completo);
+            window.globalAreas = globalAreas;
+            window.globalPlantas = globalPlantas;
         }
     } catch(e) {
         console.error("Error cargando catálogos", e);
@@ -176,6 +179,8 @@ async function loadCatalogos() {
 }
 
 function populateSelects(areasData, plantasData) {
+    areasData = areasData || window.globalAreas || [];
+    plantasData = plantasData || window.globalPlantas || [];
     const mainArea = document.getElementById('main-area');
     const mainPlanta = document.getElementById('main-planta');
     const timelineArea = document.getElementById('timeline-area');
@@ -236,7 +241,7 @@ function updateDashboardTable() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById("search-input");
-    if(searchInput) searchInput.addEventListener('input', updateDashboardTable);
+    if(searchInput && document.getElementById("recent-table")) searchInput.addEventListener('input', updateDashboardTable);
     
     const mainPeriod = document.getElementById('main-period');
     const mainArea = document.getElementById('main-area');
@@ -348,3 +353,5 @@ window.renderTableDOM = function(dataArray, tbodyElement, isPdf = false) {
 
 window.loadDashboardData = loadDashboardData;
 window.updateDashboard = updateDashboard;
+window.populateSelects = populateSelects;
+window.loadCatalogos = loadCatalogos;

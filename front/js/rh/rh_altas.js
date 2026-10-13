@@ -108,8 +108,7 @@ window.RH.initAltas = function() {
             const block = document.createElement('div');
             block.className = 'carga-block collapsed';
             block.style.animationDelay = `${idx * 100}ms`;
-
-            const incompleteCount = emps.filter(e => !e.mug || e.mug.trim() === '' || e.mug.trim() === '-').length;
+            const incompleteCount = emps.filter(e => window.RH.isEmpIncompleteGeneral ? window.RH.isEmpIncompleteGeneral(e) : (!e.mug || e.mug.trim() === '' || e.mug.trim() === '-')).length;
             const completedITCount = emps.filter(e => e.estatus_it === 'completada').length;
             const isFullyCompleted = completedITCount === emps.length && emps.length > 0;
             const isPartial = completedITCount > 0 && !isFullyCompleted;
@@ -119,9 +118,9 @@ window.RH.initAltas = function() {
             let badgeText = `Pendiente IT (${completedITCount}/${emps.length})`;
 
             if (incompleteCount > 0) {
-                badgeStyle = "background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;";
+                badgeStyle = "background: #fef3c7; color: #b45309; border: 1px solid #fde68a;";
                 badgeIcon = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>';
-                badgeText = `Incompleto (Falta MUG en ${incompleteCount})`;
+                badgeText = `Incompleto (${incompleteCount} datos faltantes)`;
             } else if (isFullyCompleted) {
                 badgeStyle = "background: #dcfce7; color: #166534; border: 1px solid #86efac;";
                 badgeIcon = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>';
@@ -211,27 +210,37 @@ window.RH.initAltas = function() {
                         <tbody>
             `;
             emps.forEach(emp => {
-                const isMugMissing = !emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-';
+                const isIncomplete = window.RH.isEmpIncompleteGeneral ? window.RH.isEmpIncompleteGeneral(emp) : (!emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-');
+
+                const missingList = window.RH.getEmpMissingFields ? window.RH.getEmpMissingFields(emp) : [];
+                const missingTitle = missingList.length > 0 ? `Faltan por registrar: ${missingList.join(', ')}` : 'Información completa';
+
                 let statusBadgeHTML = '';
-                if (isMugMissing) {
-                    statusBadgeHTML = `<span class="badge-status-custom" style="background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;" title="Falta asignar MUG por RH"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Faltan datos (Sin MUG)</span>`;
+                if (isIncomplete) {
+                    statusBadgeHTML = `<span class="badge-status-custom" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;" title="${missingTitle}"><svg viewBox="0 0 24 24" width="13" height="13" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Faltan datos</span>`;
                 } else if (emp.estatus_it === 'completada') {
                     statusBadgeHTML = `<span class="badge-status completada">Completado IT</span>`;
                 } else {
                     statusBadgeHTML = `<span class="badge-status pendiente">Pendiente IT</span>`;
                 }
 
-                const mugHTML = emp.mug ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
+                const warningIconSVG = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#d97706" stroke-width="2.5" fill="none" style="vertical-align:-2px; margin-left:4px;" title="${missingTitle}"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
+                const mugHTML = emp.mug && emp.mug.trim() !== '' && emp.mug.trim() !== '-' ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
                     <span>${emp.mug}</span>
                     <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </span>` : '<span style="color:#dc2626; font-weight:700; font-size:0.8rem;">Sin MUG</span>';
+                </span>` : '<span style="color:#b45309; font-weight:700; font-size:0.75rem; background:#fef3c7; border:1px solid #fde68a; padding:2px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:2px;" title="MUG Pendiente"><svg viewBox="0 0 24 24" width="11" height="11" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Sin MUG</span>';
+
+                const nominaHTML = emp.numero_nomina && emp.numero_nomina.trim() !== '' && emp.numero_nomina.trim() !== '-' ? emp.numero_nomina : '<span style="color:#b45309; font-weight:600; font-size:0.8rem;" title="Nómina Pendiente">-</span>';
+
+                const trBg = isIncomplete ? `style="background-color: rgba(245, 158, 11, 0.12); border-left: 4px solid #f59e0b;" title="${missingTitle}"` : '';
 
                 tableHTML += `
-                    <tr>
+                    <tr ${trBg}>
                         <td style="padding: 0.6rem 1rem;">${mugHTML}</td>
-                        <td style="padding: 0.6rem 1rem;">${emp.numero_nomina || '-'}</td>
-                        <td style="padding: 0.6rem 1rem;"><strong>${emp.nombre} ${emp.apellido_paterno} ${emp.apellido_materno || ''}</strong></td>
-                        <td style="padding: 0.6rem 1rem;">${emp.puesto}<br><span style="font-size:0.75rem; color:#2563eb;">${emp.nombre_area || ''}</span></td>
+                        <td style="padding: 0.6rem 1rem;">${nominaHTML}</td>
+                        <td style="padding: 0.6rem 1rem;"><strong>${emp.nombre || ''} ${emp.apellido_paterno || ''} ${emp.apellido_materno || ''}</strong> ${isIncomplete ? warningIconSVG : ''}</td>
+                        <td style="padding: 0.6rem 1rem;">${emp.puesto || 'Sin asignar'}<br><span style="font-size:0.75rem; color:#2563eb;">${emp.nombre_area || ''}</span></td>
                         <td style="padding: 0.6rem 1rem;">
                             ${statusBadgeHTML}
                         </td>
@@ -286,26 +295,39 @@ window.RH.initAltas = function() {
             return db - da;
         });
         sorted.forEach(emp => {
-            const isMugMissing = !emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-';
+            const isIncomplete = window.RH.isEmpIncompleteGeneral ? window.RH.isEmpIncompleteGeneral(emp) : (!emp.mug || emp.mug.trim() === '' || emp.mug.trim() === '-');
+
+            const missingList = window.RH.getEmpMissingFields ? window.RH.getEmpMissingFields(emp) : [];
+            const missingTitle = missingList.length > 0 ? `Faltan por registrar: ${missingList.join(', ')}` : 'Información completa';
+
             let statusBadgeHTML = '';
-            if (isMugMissing) {
-                statusBadgeHTML = `<span class="badge-status-custom" style="background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Faltan datos (Sin MUG)</span>`;
+            if (isIncomplete) {
+                statusBadgeHTML = `<span class="badge-status-custom" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;" title="${missingTitle}"><svg viewBox="0 0 24 24" width="13" height="13" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Faltan datos</span>`;
             } else if (emp.estatus_it === 'completada') {
                 statusBadgeHTML = `<span class="badge-status completada">Completado IT</span>`;
             } else {
                 statusBadgeHTML = `<span class="badge-status pendiente">Pendiente IT</span>`;
             }
 
-            const mugHTML = emp.mug ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
+            const warningIconSVG = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#d97706" stroke-width="2.5" fill="none" style="vertical-align:-2px; margin-left:4px;" title="${missingTitle}"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
+            const mugHTML = emp.mug && emp.mug.trim() !== '' && emp.mug.trim() !== '-' ? `<span class="copyable-mug" data-mug="${emp.mug}" title="Clic para copiar MUG">
                 <span>${emp.mug}</span>
                 <svg class="copy-icon" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </span>` : '<span style="color:#c2410c; font-weight:600; font-size:0.8rem;">Sin MUG</span>';
+            </span>` : '<span style="color:#b45309; font-weight:700; font-size:0.75rem; background:#fef3c7; border:1px solid #fde68a; padding:2px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:2px;" title="MUG Pendiente"><svg viewBox="0 0 24 24" width="11" height="11" stroke="#b45309" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Sin MUG</span>';
+
+            const nominaHTML = emp.numero_nomina && emp.numero_nomina.trim() !== '' && emp.numero_nomina.trim() !== '-' ? emp.numero_nomina : '<span style="color:#b45309; font-weight:600; font-size:0.8rem;" title="Nómina Pendiente">-</span>';
 
             const tr = document.createElement('tr');
+            if (isIncomplete) {
+                tr.style.backgroundColor = 'rgba(245, 158, 11, 0.12)'; // Amarillo suave (Información incompleta)
+                tr.style.borderLeft = '4px solid #f59e0b';
+                tr.title = missingTitle;
+            }
             tr.innerHTML = `
                 <td>${mugHTML}</td>
-                <td>${emp.numero_nomina || '-'}</td>
-                <td>${emp.nombre} ${emp.apellido_paterno} ${emp.apellido_materno || ''}</td>
+                <td>${nominaHTML}</td>
+                <td><strong>${emp.nombre} ${emp.apellido_paterno} ${emp.apellido_materno || ''}</strong> ${isIncomplete ? warningIconSVG : ''}</td>
                 <td>${emp.puesto}</td>
                 <td><span style="color:#2563eb; font-weight:600;">${emp.nombre_area || ''}</span></td>
                 <td>${emp.fecha_ingreso ? emp.fecha_ingreso.split(' ')[0] : ''}</td>

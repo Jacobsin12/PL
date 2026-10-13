@@ -242,16 +242,23 @@ try {
         
     } elseif ($method === 'DELETE') {
         // ELIMINAR EMPLEADO
-        $data = json_decode(file_get_contents("php://input"), true);
+        $data = json_decode(file_get_contents("php://input"), true) ?? [];
+        $id_ingreso = $data['id_ingreso'] ?? $_GET['id_ingreso'] ?? $_GET['id'] ?? null;
         
-        if (!isset($data['id_ingreso'])) {
+        if (!$id_ingreso) {
             echo json_encode(['status' => 'error', 'message' => 'Falta el ID del empleado a eliminar.']);
             exit;
         }
+
+        // Eliminar configuracion_it asociada si existe para evitar errores de llave foránea
+        try {
+            $stmtConf = $conn->prepare("DELETE FROM configuracion_it WHERE id_ingreso = :id_ingreso");
+            $stmtConf->execute([':id_ingreso' => $id_ingreso]);
+        } catch (Exception $eConf) {}
         
         $sql = "DELETE FROM ingresos WHERE id_ingreso = :id_ingreso";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':id_ingreso' => $data['id_ingreso']]);
+        $stmt->execute([':id_ingreso' => $id_ingreso]);
         
         echo json_encode(['status' => 'success', 'message' => 'Empleado eliminado correctamente.']);
     } else {
